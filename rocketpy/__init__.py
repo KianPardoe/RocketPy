@@ -41,4 +41,5 @@ from .Environment import Environment
 from .SolidMotor import SolidMotor
 from .Rocket import Rocket
 from .Flight import Flight
+from .ControlSys import ControlSys
 from .utilities import *

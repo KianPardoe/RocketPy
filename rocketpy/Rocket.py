@@ -14,6 +14,7 @@ from inspect import signature, getsourcelines
 from collections import namedtuple
 
 import numpy as np
+from rocketpy.ControlSys import ControlSys
 from scipy import integrate
 from scipy import linalg
 import matplotlib.pyplot as plt
@@ -160,6 +161,9 @@ class Rocket:
         -------
         None
         """
+        # Define Control Surface
+        self.controlSurface = ControlSys(0, [0, 0, 0, 0, 0, 0])
+
         # Define rocket inertia attributes in SI units
         self.mass = mass
         self.inertiaI = inertiaI

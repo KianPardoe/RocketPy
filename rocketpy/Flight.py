@@ -1359,6 +1359,16 @@ class Flight:
                     / 2
                 )
                 M3 += M3f - M3d
+        
+        # Get forces imparted by Control Surfaces
+        forceAndMoments = self.rocket.controlSurface.getForceMoment(t, u)
+        R1 += forceAndMoments[0]
+        R2 += forceAndMoments[1]
+        R3 += forceAndMoments[2]
+        M1 += forceAndMoments[3]
+        M2 += forceAndMoments[4]
+        M3 += forceAndMoments[5]
+        
         # Calculate derivatives
         # Angular acceleration
         alpha1 = (
