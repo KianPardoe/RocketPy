@@ -7,11 +7,13 @@ Env = Environment(
 
 import datetime
 
-tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+#tomorrow = datetime.date.today() + datetime.timedelta(days=1)
 
-Env.setDate((tomorrow.year, tomorrow.month, tomorrow.day, 12))  # Hour given in UTC time
+#Env.setDate((tomorrow.year, tomorrow.month, tomorrow.day, 12))  # Hour given in UTC time
 
-Env.setAtmosphericModel(type="Forecast", file="GFS")
+URL = "http://weather.uwyo.edu/cgi-bin/sounding?region=samer&TYPE=TEXT%3ALIST&YEAR=2019&MONTH=02&FROM=0500&TO=0512&STNM=83779"
+
+Env.setAtmosphericModel(type="WyomingSounding", file=URL)
 
 Env.info()
 
