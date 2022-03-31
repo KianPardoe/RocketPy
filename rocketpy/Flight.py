@@ -1361,7 +1361,8 @@ class Flight:
                 M3 += M3f - M3d
         
         # Get forces imparted by Control Surfaces
-        forceAndMoments = self.rocket.controlSurface.getForceMoment(t, u)
+        finAngles = self.rocket.controlSurface.getAnglesSISOfromPID(t,u)
+        forceAndMoments = self.rocket.controlSurface.getForceMoment(t, u , finAngles)
         R1 += forceAndMoments[0]
         R2 += forceAndMoments[1]
         R3 += forceAndMoments[2]

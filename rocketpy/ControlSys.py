@@ -6,29 +6,44 @@ class ControlSys:
     def __init__(self, t0, u0):
         self.t = t0
         self.u = u0
-        setpoint = 3134
-        cuma_error = 0
+        self.setpoint = 3000
+        self.cuma_error = 0
     
-    def getForceMoment(self, t, u):
+    def getForceMoment(self, t, u, finAngles):
         # Returns the vector [Rx Ry Rz Mx My Mz]
+
+        # Linear drag estimation
+        min_drag = 0.0
+        max_drag = 1.0
+        rho = 1.225
+        finArea = 0.005
+
+        drag_cof = 2*(max_drag-min_drag)*finAngles[0]/math.pi
+        drag_force = 0.5*rho*u[5]*u[5]*drag_cof*finArea
+        return [0, 0, -drag_force, 0, 0, 0]
+
         # Do test where a constant torque is applied about the x axis after t = 4
         if t > 10:
-            return [0, 0, -50, 0, 0, 0]
+            return [0, 0, -50, 0, 0, 0] 
         else:
             return [0, 0, 0, 0, 0, 0]
     
-    def getAnglesSISOfromPID(self, position_x , velocity_z):
+    def getAnglesSISOfromPID(self, t,u):
         # Calculates fin angles using PID controller for SISO
-            # Input: self, position_x: altitude as scalar (m), velocity_z: vertical velocity (m/s)
+            # Input: self, position_z: altitude as scalar (m), velocity_z: vertical velocity (m/s)
             # Fin angles (radians)
 
+        # Input parsing
+        position_z = u[2]
+        velocity_z = u[5]
+
         # Controller parameters
-        proportial_gain = 1
+        proportial_gain = 0.0005
         integral_gain = 0
         derivative_gain = 0
 
         # Term calculation
-        error = self.setpoint - position_x
+        error = self.setpoint - position_z
         error_integral = self.cuma_error + error
         rate_error = velocity_z
         
