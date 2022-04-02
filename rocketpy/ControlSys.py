@@ -3,9 +3,9 @@ import math
 class ControlSys:
     # Define Class Attributes
     
-    def __init__(self, t0, u0):
-        self.t = t0
-        self.u = u0
+    def __init__(self, dToCM):
+        # dToCM Distance from the CM to origin of control system measured along z axis of rocket frame
+        self.dToCM = dToCM  
         self.setpoint = 3000
         self.cuma_error = 0
     
