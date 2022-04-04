@@ -1,26 +1,32 @@
 import math
+import numpy as np
 
 class ControlSys:
     # Define Class Attributes
     
-    def __init__(self, dToCM):
-        # dToCM Distance from the CM to origin of control system measured along z axis of rocket frame
-        self.dToCM = dToCM  
+    def __init__(self, surfs):
+        # surfs is a list containing each control surface object
+        self.surfs = surfs
         self.setpoint = 3000
         self.cuma_error = 0
     
     def getForceMoment(self, t, u, finAngles):
-        # Returns the vector [Rx Ry Rz Mx My Mz]
+        # Returns the vector [Fx Fy Fz Mx My Mz] in frame of Rocket
 
         # Linear drag estimation
-        min_drag = 0.0
+        '''min_drag = 0.0
         max_drag = 1.0
         rho = 1.225
         finArea = 0.005
 
         drag_cof = 2*(max_drag-min_drag)*finAngles[0]/math.pi
         drag_force = 0.5*rho*u[5]*u[5]*drag_cof*finArea
-        return [0, 0, -drag_force, 0, 0, 0]
+        return [0, 0, -drag_force, 0, 0, 0]'''
+
+        # Sum forces and moments for each control surface
+        ForceMoments = np.zeros(6)
+        for surf in self.surfs:
+            ForceMoments = np.add(ForceMoments, surf.getForceMoment())
 
         # Do test where a constant torque is applied about the x axis after t = 4
         if t > 10:

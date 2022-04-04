@@ -14,6 +14,7 @@ from inspect import signature, getsourcelines
 from collections import namedtuple
 
 import numpy as np
+from rocketpy.ControlSurf import ControlSurf
 from rocketpy.ControlSys import ControlSys
 from scipy import integrate
 from scipy import linalg
@@ -161,8 +162,12 @@ class Rocket:
         -------
         None
         """
-        # Define Control Surface
-        self.controlSurface = ControlSys(0, [0, 0, 0, 0, 0, 0])
+        # Define Control System
+        surf1 = ControlSurf(-0.2, 0.09, 0)
+        surf2 = ControlSurf(-0.2, 0.09, math.pi/2)
+        surf3 = ControlSurf(-0.2, 0.09, math.pi)
+        surf4 = ControlSurf(-0.2, 0.09, 3*math.pi/4)
+        self.controlSurface = ControlSys([surf1, surf2, surf3, surf4])
 
         # Define rocket inertia attributes in SI units
         self.mass = mass

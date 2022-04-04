@@ -62,3 +62,11 @@ class ControlSurf:
             r_OC_R = np.array([0.5*math.cos(self.Theta)*D, 0.5*math.sin(self.Theta)*D, self.h])
             r_CP_B = np.array([x, y, z])
             r_OP_R = r_OC_R + R_AR.dot(R_BA).dot(r_CP_B)
+
+            # Find Moments about COM
+            M_R = np.cross(r_OP_R, F_R)
+
+            return np.concatenate((F_R, M_R), axis=None)
+
+        def setAngle(self, Phi):
+            self.Phi = Phi
