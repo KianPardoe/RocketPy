@@ -23,16 +23,16 @@ class ControlSys:
         drag_force = 0.5*rho*u[5]*u[5]*drag_cof*finArea
         return [0, 0, -drag_force, 0, 0, 0]'''
 
+        # Set new Angles for the control surfaces
+        for i in range(0,len(self.surfs)):
+            self.surfs[i].setAngle(finAngles[i])
+
         # Sum forces and moments for each control surface
         ForceMoments = np.zeros(6)
         for surf in self.surfs:
             ForceMoments = np.add(ForceMoments, surf.getForceMoment())
 
-        # Do test where a constant torque is applied about the x axis after t = 4
-        if t > 10:
-            return [0, 0, -50, 0, 0, 0] 
-        else:
-            return [0, 0, 0, 0, 0, 0]
+        return ForceMoments.tolist()
     
     def getAnglesSISOfromPID(self, t,u):
         # Calculates fin angles using PID controller for SISO

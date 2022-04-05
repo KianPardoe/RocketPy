@@ -14,6 +14,7 @@ import datetime
 URL = "http://weather.uwyo.edu/cgi-bin/sounding?region=samer&TYPE=TEXT%3ALIST&YEAR=2019&MONTH=02&FROM=0500&TO=0512&STNM=83779"
 
 Env.setAtmosphericModel(type="WyomingSounding", file=URL)
+#Env.setAtmosphericModel(type="Reanalysis", file="/data/weather/")
 
 Env.info()
 
