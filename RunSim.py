@@ -59,6 +59,6 @@ Tail = Calisto.addTail(
     topRadius=0.0635, bottomRadius=0.0435, length=0.060, distanceToCM=-1.194656
 )
 
-TestFlight = Flight(rocket=Calisto, environment=Env, inclination=85, heading=0)
+TestFlight = Flight(rocket=Calisto, environment=Env, inclination=85, heading=0, visualiseRocket = True)
 
 TestFlight.allInfo()

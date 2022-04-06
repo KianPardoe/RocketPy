@@ -67,7 +67,7 @@ class ControlSys:
         elif(out<0):
             out = 0
 
-        return [out,out,out,out]
+        return [out,-out,out,-out]
 
     def getAnglesLQR(self, position , velocity, orientation, angular_velocity):
         # Calculates fin angles using LQR

@@ -22,6 +22,10 @@ from matplotlib import cm
 
 from .Function import Function
 
+import vtkplotlib as vpl
+from stl.mesh import Mesh
+import copy
+
 
 class Flight:
     """Keeps all flight information and has a method to simulate flight.
@@ -523,6 +527,7 @@ class Flight:
         atol=6 * [1e-3] + 4 * [1e-6] + 3 * [1e-3],
         timeOvershoot=True,
         verbose=False,
+        visualiseRocket=False
     ):
         """Run a trajectory simulation.
 
@@ -603,6 +608,15 @@ class Flight:
         self.initialSolution = initialSolution
         self.timeOvershoot = timeOvershoot
         self.terminateOnApogee = terminateOnApogee
+        self.visualiseRocket = visualiseRocket
+
+        # Load Rocket Meshes if visualiseRocket=True
+        if visualiseRocket:
+            self.rocketMesh = Mesh.from_file("/data/visualisation/3D_models/Rocket.stl")
+            self.finMesh = Mesh.from_file("/data/visualisation/3D_models/Fin.stl")
+        else:
+            self.rocketMesh = None
+            self.finMesh = None
 
         # Modifying Rail Length for a better out of rail condition
         upperRButton = max(self.rocket.railButtons[0])
@@ -1359,7 +1373,8 @@ class Flight:
                     / 2
                 )
                 M3 += M3f - M3d
-        
+        ''' ###################################################################################
+        ################################################################################### '''
         # Get forces imparted by Control Surfaces
         finAngles = self.rocket.controlSys.getAnglesSISOfromPID(t,u)
         forceAndMoments = self.rocket.controlSys.getForceMoment(t, u , finAngles)
@@ -1369,6 +1384,16 @@ class Flight:
         M1 += forceAndMoments[3]
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
+
+        # If visualiseRocket=True then save frame for visualisation
+        '''if visualiseRocket and t:
+            new_finMesh = copy.deepcopy(self.finMesh)
+            new_rocketMesh = copy.deepcopy(self.rocketMesh)
+        '''
+
+
+        ''' ###################################################################################
+        ################################################################################### '''
         
         # Calculate derivatives
         # Angular acceleration
