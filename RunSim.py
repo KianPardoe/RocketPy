@@ -16,7 +16,7 @@ URL = "http://weather.uwyo.edu/cgi-bin/sounding?region=samer&TYPE=TEXT%3ALIST&YE
 Env.setAtmosphericModel(type="WyomingSounding", file=URL)
 #Env.setAtmosphericModel(type="Reanalysis", file="/data/weather/")
 
-Env.info()
+#Env.info()
 
 Pro75M1670 = SolidMotor(
     #thrustSource="../../data/motors/Cesaroni_M1670.eng",
@@ -61,4 +61,4 @@ Tail = Calisto.addTail(
 
 TestFlight = Flight(rocket=Calisto, environment=Env, inclination=85, heading=0, visualiseRocket = True)
 
-TestFlight.allInfo()
+#TestFlight.allInfo()

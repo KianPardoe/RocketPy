@@ -608,12 +608,15 @@ class Flight:
         self.initialSolution = initialSolution
         self.timeOvershoot = timeOvershoot
         self.terminateOnApogee = terminateOnApogee
+        
+        # Visualistaion variables
         self.visualiseRocket = visualiseRocket
+        self.visualTime = 0
 
         # Load Rocket Meshes if visualiseRocket=True
-        if visualiseRocket:
-            self.rocketMesh = Mesh.from_file("/data/visualisation/3D_models/Rocket.stl")
-            self.finMesh = Mesh.from_file("/data/visualisation/3D_models/Fin.stl")
+        if self.visualiseRocket:
+            self.rocketMesh = Mesh.from_file("data/visualisation/3D_models/Rocket.stl")
+            self.finMesh = Mesh.from_file("data/visualisation/3D_models/Fin.stl")
         else:
             self.rocketMesh = None
             self.finMesh = None
@@ -1384,12 +1387,23 @@ class Flight:
         M1 += forceAndMoments[3]
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
-
+        
         # If visualiseRocket=True then save frame for visualisation
-        '''if visualiseRocket and t:
+        imageTimePeriod = 1.0/30
+        if self.visualiseRocket and t > self.visualTime + imageTimePeriod:
+            self.visualTime = t
             new_finMesh = copy.deepcopy(self.finMesh)
             new_rocketMesh = copy.deepcopy(self.rocketMesh)
-        '''
+
+            print(np.linalg.det(Kt))
+            T_vis = np.zeros((4,4))
+            T_vis[:3, :3] = Kt
+            new_rocketMesh.transform(T_vis)
+            frame = vpl.mesh_plot(new_rocketMesh)
+            vpl.show()
+            #vpl.save_fig("data/visualisation/working_images", off_screen=True, fig=frame)
+
+        
 
 
         ''' ###################################################################################
