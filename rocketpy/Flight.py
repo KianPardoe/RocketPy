@@ -14,6 +14,7 @@ from inspect import signature, getsourcelines
 from collections import namedtuple
 
 import numpy as np
+from rocketpy.RocketVisual import RocketVisual
 from scipy import integrate
 from scipy import linalg
 import matplotlib.pyplot as plt
@@ -611,15 +612,11 @@ class Flight:
         
         # Visualistaion variables
         self.visualiseRocket = visualiseRocket
-        self.visualTime = 0
 
-        # Load Rocket Meshes if visualiseRocket=True
+        # Create Rocket Visualisation object if visualiseRocket=True
         if self.visualiseRocket:
-            self.rocketMesh = Mesh.from_file("data/visualisation/3D_models/Rocket.stl")
-            self.finMesh = Mesh.from_file("data/visualisation/3D_models/Fin.stl")
-        else:
-            self.rocketMesh = None
-            self.finMesh = None
+            self.rocketVis = RocketVisual(self.rocket.controlSys)
+            self.terminateOnApogee = True  # Terminate on apogee if visualising
 
         # Modifying Rail Length for a better out of rail condition
         upperRButton = max(self.rocket.railButtons[0])
@@ -1388,24 +1385,11 @@ class Flight:
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
         
-        # If visualiseRocket=True then save frame for visualisation
-        imageTimePeriod = 1.0/30
-        if self.visualiseRocket and t > self.visualTime + imageTimePeriod:
-            self.visualTime = t
-            new_finMesh = copy.deepcopy(self.finMesh)
-            new_rocketMesh = copy.deepcopy(self.rocketMesh)
-
-            print(np.linalg.det(Kt))
-            T_vis = np.zeros((4,4))
-            T_vis[:3, :3] = Kt
-            new_rocketMesh.transform(T_vis)
-            frame = vpl.mesh_plot(new_rocketMesh)
-            vpl.show()
-            #vpl.save_fig("data/visualisation/working_images", off_screen=True, fig=frame)
-
+        # If visualiseRocket==True then save frame for visualisation
+        if self.visualiseRocket:
+            self.rocketVis.makeRocketVisFrame(t, K)
         
-
-
+            
         ''' ###################################################################################
         ################################################################################### '''
         

@@ -33,7 +33,7 @@ Pro75M1670 = SolidMotor(
     interpolationMethod="linear",
 )
 
-Pro75M1670.info()
+#Pro75M1670.info()
 
 Calisto = Rocket(
     motor=Pro75M1670,
