@@ -42,7 +42,7 @@ class ControlSys:
         # Input parsing
         position_z = u[2]
         velocity_z = u[5]
-
+        
         # Controller parameters
         proportial_gain = 0.0005
         integral_gain = 0
@@ -67,7 +67,7 @@ class ControlSys:
         elif(out<0):
             out = 0
 
-        return [out,-out,out,-out]
+        return [-out,out,out,-out]
 
     def getAnglesLQR(self, position , velocity, orientation, angular_velocity):
         # Calculates fin angles using LQR
