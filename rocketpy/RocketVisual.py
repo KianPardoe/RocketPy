@@ -5,6 +5,7 @@ import copy
 import numpy as np
 import os
 import glob
+import cv2
 
 class RocketVisual:
 
@@ -23,13 +24,16 @@ class RocketVisual:
     def __init__(
         self,
         controlSys,
-        frameRate = 30
+        frameRate = 30,
+        imageDim = 1000
     ):
 
         self.controlSys = controlSys
         self.frameRate = frameRate
+        self.imageDim = imageDim
         self.visTime = 0
         self.frameNum = 0
+        
 
         # Read in the rocket stl and control surface stl
         self.rocketMesh = Mesh.from_file("data/visualisation/3D_models/Rocket.stl")
@@ -39,6 +43,9 @@ class RocketVisual:
         files = glob.glob('data/visualisation/working_images/.jpeg*')
         for f in files:
             os.remove(f)
+
+        # Create video writing object
+        self.video = cv2.VideoWriter("Flight.avi", 0, 1, (self.imageDim,self.imageDim))
     
     # Return the np.array for the rotation from frame B to frame A by angle phi
     def R_BA(self, phi):
@@ -86,7 +93,7 @@ class RocketVisual:
 
             # Setup vtkplot figure
             vpl.figure(name="fig")
-            vpl.view(focal_point=(0,0,0), camera_position=(0, -1000, 0), camera_direction=(-1,0,0), up_view=None, fig="fig")
+            vpl.view(focal_point=(0,0,0), camera_position=(0, 0, 0), camera_direction=(0,1500,-1000))
             # Plot rocket
             frame = vpl.mesh_plot(rocket)
 
@@ -109,8 +116,14 @@ class RocketVisual:
                 vpl.mesh_plot(surfs[i])
             
             
-            vpl.save_fig("data/visualisation/working_images/{}.jpeg".format(self.frameNum), pixels=1000, off_screen=True)
-            vpl.close(fig)
+            #vpl.save_fig("data/visualisation/working_images/{}.jpeg".format(self.frameNum), pixels=self.imageDim, off_screen=True)
+
+            self.video.write(vpl.screenshot_fig(magnification=1, pixels=self.imageDim, off_screen=True))
+            vpl.close()
+
+    def createVideo(self):
+        cv2.destroyAllWindows()
+        self.video.release()
             
 
 

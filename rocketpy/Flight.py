@@ -3399,6 +3399,9 @@ class Flight:
 
         return None
 
+    def visualise(self):
+        self.rocketVis.createVideo()
+
     def animate(self, start=0, stop=None, fps=12, speed=4, elev=None, azim=None):
         """Plays an animation of the flight. Not implemented yet. Only
         kinda works outside notebook.
