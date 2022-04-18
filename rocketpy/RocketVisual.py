@@ -6,6 +6,12 @@ import numpy as np
 import os
 import glob
 import cv2
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+import vtkplotlib.image_io
+import matplotlib.pylab as plt
+import vtk
 
 class RocketVisual:
 
@@ -24,7 +30,7 @@ class RocketVisual:
     def __init__(
         self,
         controlSys,
-        frameRate = 30,
+        frameRate = 20,
         imageDim = 1000
     ):
 
@@ -33,19 +39,18 @@ class RocketVisual:
         self.imageDim = imageDim
         self.visTime = 0
         self.frameNum = 0
+        self.ims = []
         
-
         # Read in the rocket stl and control surface stl
         self.rocketMesh = Mesh.from_file("data/visualisation/3D_models/Rocket.stl")
         self.surfMesh = Mesh.from_file("data/visualisation/3D_models/Fin.stl")
 
+        """
         # Delete any jpeg images in the working images directory
         files = glob.glob('data/visualisation/working_images/.jpeg*')
         for f in files:
-            os.remove(f)
+            os.remove(f) """
 
-        # Create video writing object
-        self.video = cv2.VideoWriter("Flight.avi", 0, 1, (self.imageDim,self.imageDim))
     
     # Return the np.array for the rotation from frame B to frame A by angle phi
     def R_BA(self, phi):
@@ -92,11 +97,14 @@ class RocketVisual:
             self.rotateMesh(rocket, R_RG)
 
             # Setup vtkplot figure
-            vpl.figure(name="fig")
-            vpl.view(focal_point=(0,0,0), camera_position=(0, 0, 0), camera_direction=(0,1500,-1000))
+            fig = vpl.figure()
+            
             # Plot rocket
-            frame = vpl.mesh_plot(rocket)
+            vpl.mesh_plot(rocket)
 
+            # Change camera view of rocket
+            vpl.view(focal_point=(0,0,0), camera_position=(0, 0, 0), camera_direction=(0,1500,-1000))
+            """
             # Rotate and translate control surfaces from control surface frame to Global frame.
             for i in range(len(surfs)):
                 R_AR = self.R_AR(self.controlSys.surfs[i].Theta)
@@ -114,16 +122,24 @@ class RocketVisual:
 
                 # Plot the control surface
                 vpl.mesh_plot(surfs[i])
+            """
             
-            
-            #vpl.save_fig("data/visualisation/working_images/{}.jpeg".format(self.frameNum), pixels=self.imageDim, off_screen=True)
-
-            self.video.write(vpl.screenshot_fig(magnification=1, pixels=self.imageDim, off_screen=True))
+            im = vpl.screenshot_fig(magnification=1, pixels=self.imageDim, trim_pad_width=None, off_screen=True)
+            self.ims.append(im)
             vpl.close()
+            
 
     def createVideo(self):
-        cv2.destroyAllWindows()
-        self.video.release()
+        
+        height, width, layers = self.ims[0].shape
+        size = (width,height)
+        fps = 15
+        out = cv2.VideoWriter('Flight.mp4',cv2.VideoWriter_fourcc(*'MP4V'), fps, size)
+        for i in range(len(self.ims)):
+            out.write(self.ims[i])
+        out.release()
+
+
             
 
 
