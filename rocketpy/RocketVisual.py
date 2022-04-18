@@ -103,8 +103,8 @@ class RocketVisual:
             vpl.mesh_plot(rocket)
 
             # Change camera view of rocket
-            vpl.view(focal_point=(0,0,0), camera_position=(0, 0, 0), camera_direction=(0,1500,-1000))
-            """
+            vpl.view(focal_point=(0,0,0), camera_position=(0, 0, 0), camera_direction=(0,1500,-1500))
+            
             # Rotate and translate control surfaces from control surface frame to Global frame.
             for i in range(len(surfs)):
                 R_AR = self.R_AR(self.controlSys.surfs[i].Theta)
@@ -114,15 +114,16 @@ class RocketVisual:
                 self.rotateMesh(surfs[i], R_AR.dot(R_BA))
 
                 # Translate control surface to correct position on rocket
-                r = np.array([0.5*self.controlSys.surfs[i].D, 0, self.controlSys.surfs[i].h])
+                # multiply by 1000 to get r from m to mm
+                r = 1000*np.array([0.5*self.controlSys.surfs[i].D, 0, self.controlSys.surfs[i].h])
                 self.translateMesh(surfs[i], R_AR.dot(r))
 
                 # Rotate control surface from Rocket frame to Global frame
                 self.rotateMesh(surfs[i], R_RG)
 
                 # Plot the control surface
-                vpl.mesh_plot(surfs[i])
-            """
+                vpl.mesh_plot(surfs[i], color="dark blue")
+            
             
             im = vpl.screenshot_fig(magnification=1, pixels=self.imageDim, trim_pad_width=None, off_screen=True)
             self.ims.append(im)
@@ -134,7 +135,7 @@ class RocketVisual:
         height, width, layers = self.ims[0].shape
         size = (width,height)
         fps = 15
-        out = cv2.VideoWriter('Flight.mp4',cv2.VideoWriter_fourcc(*'MP4V'), fps, size)
+        out = cv2.VideoWriter('Flight.mp4',cv2.VideoWriter_fourcc(*'mp4v'), fps, size)
         for i in range(len(self.ims)):
             out.write(self.ims[i])
         out.release()
