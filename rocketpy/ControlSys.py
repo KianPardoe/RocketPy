@@ -7,7 +7,8 @@ class ControlSys:
     def __init__(self, surfs):
         # surfs is a list containing each control surface object
         self.surfs = surfs
-        self.setpoint = 3000
+        self.setpoint = 2000
+        self.hold_error = 0
         self.cuma_error = 0
     
     def getForceMoment(self, t, u, finAngles):
@@ -34,7 +35,22 @@ class ControlSys:
 
         return ForceMoments.tolist()
     
-    def getAnglesSISOfromPID(self, t,u):
+
+    def predictApogee(self,t,u,uDot):
+
+        # Input parsing
+        p = u[2]
+        v = u[5]
+        a = uDot[5]
+        g = 9.81
+
+        # Calculate apogee
+        apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p
+        print(apogee)
+        return apogee
+
+
+    def getAnglesSISOfromPID(self, t,u,uDot):
         # Calculates fin angles using PID controller for SISO
             # Input: self, position_z: altitude as scalar (m), velocity_z: vertical velocity (m/s)
             # Fin angles (radians)
@@ -42,19 +58,21 @@ class ControlSys:
         # Input parsing
         position_z = u[2]
         velocity_z = u[5]
+        acceleration_z = uDot[5]
         
         # Controller parameters
-        proportial_gain = 0.0005
+        proportial_gain = 1
         integral_gain = 0
         derivative_gain = 0
 
         # Term calculation
-        error = self.setpoint - position_z
+        error = self.predictApogee(t,u,uDot) - self.setpoint
         error_integral = self.cuma_error + error
-        rate_error = velocity_z
+        rate_error = error - self.hold_error
         
-        # Cumalative error calculation
+        # Update Error Terms for store
         self.cuma_error = error_integral
+        self.hold_error = error
 
         # Output calculation using PID
         out = proportial_gain*error
