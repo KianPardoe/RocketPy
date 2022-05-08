@@ -528,7 +528,8 @@ class Flight:
         atol=6 * [1e-3] + 4 * [1e-6] + 3 * [1e-3],
         timeOvershoot=True,
         verbose=False,
-        visualiseRocket=False
+        visualiseRocket=False,
+        z_accel = 0
     ):
         """Run a trajectory simulation.
 
@@ -1176,6 +1177,7 @@ class Flight:
         else:
             ax, ay, az = 0, 0, 0
 
+        self.z_accel = az
         return [vx, vy, vz, ax, ay, az, 0, 0, 0, 0, 0, 0, 0]
 
     def uDotRail2(self, t, u, postProcessing=False):
@@ -1376,7 +1378,7 @@ class Flight:
         ''' ###################################################################################
         ################################################################################### '''
         # Get forces imparted by Control Surfaces
-        finAngles = self.rocket.controlSys.getAnglesSISOfromPID(t,u,uDot)
+        finAngles = self.rocket.controlSys.getAnglesSISOfromPID(t,u,self.z_accel)
         forceAndMoments = self.rocket.controlSys.getForceMoment(t, u, finAngles)
         R1 += forceAndMoments[0]
         R2 += forceAndMoments[1]
@@ -1431,6 +1433,7 @@ class Flight:
             (R3 - b * Mt * (alpha2 - omega1 * omega3) + Thrust) / M,
         ]
         ax, ay, az = np.dot(K, L)
+        self.z_accel = az
         az -= self.env.g  # Include gravity
 
         # Create uDot

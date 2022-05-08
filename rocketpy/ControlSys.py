@@ -36,21 +36,21 @@ class ControlSys:
         return ForceMoments.tolist()
     
 
-    def predictApogee(self,t,u,uDot):
+    def predictApogee(self,t,u,z_accel):
 
         # Input parsing
         p = u[2]
         v = u[5]
-        a = uDot[5]
         g = 9.81
+        a = z_accel - g
 
         # Calculate apogee
         apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p
-        print(apogee)
+        print(apogee-p)
         return apogee
 
 
-    def getAnglesSISOfromPID(self, t,u,uDot):
+    def getAnglesSISOfromPID(self, t,u,z_accel):
         # Calculates fin angles using PID controller for SISO
             # Input: self, position_z: altitude as scalar (m), velocity_z: vertical velocity (m/s)
             # Fin angles (radians)
@@ -58,15 +58,14 @@ class ControlSys:
         # Input parsing
         position_z = u[2]
         velocity_z = u[5]
-        acceleration_z = uDot[5]
         
         # Controller parameters
-        proportial_gain = 1
+        proportial_gain = 0.1
         integral_gain = 0
         derivative_gain = 0
 
         # Term calculation
-        error = self.predictApogee(t,u,uDot) - self.setpoint
+        error = self.predictApogee(t,u,z_accel) - self.setpoint
         error_integral = self.cuma_error + error
         rate_error = error - self.hold_error
         
