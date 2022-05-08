@@ -7,7 +7,7 @@ class ControlSys:
     def __init__(self, surfs):
         # surfs is a list containing each control surface object
         self.surfs = surfs
-        self.setpoint = 2000
+        self.setpoint = 2700
         self.hold_error = 0
         self.cuma_error = 0
     
@@ -41,14 +41,18 @@ class ControlSys:
         # Input parsing
         p = u[2]
         v = u[5]
-        g = 9.81
-        a = z_accel - g
+        g = -9.81
+        a = z_accel + g
 
         # Calculate apogee
         apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p
-        print(apogee-p)
+        # print('-------------------')
+        # print('Velocity: ' + str(v))
+        # print('Acceleration: ' +  str(a))
+        # print('Apogee: ' +  str(apogee))
+        # print('-------------------')
         return apogee
-
+        
 
     def getAnglesSISOfromPID(self, t,u,z_accel):
         # Calculates fin angles using PID controller for SISO
@@ -60,7 +64,7 @@ class ControlSys:
         velocity_z = u[5]
         
         # Controller parameters
-        proportial_gain = 0.1
+        proportial_gain = 0.001
         integral_gain = 0
         derivative_gain = 0
 
