@@ -31,7 +31,7 @@ class ControlSys:
         # Sum forces and moments for each control surface
         ForceMoments = np.zeros(6)
         for surf in self.surfs:
-            ForceMoments = np.add(ForceMoments, surf.getForceMoment())
+            ForceMoments = np.add(ForceMoments, surf.getForceMoment(u[5]))
 
         return ForceMoments.tolist()
     
@@ -43,7 +43,6 @@ class ControlSys:
         v = u[5]
         g = -9.81
         a = z_accel + g
-
         # Calculate apogee
         apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p
         # print('-------------------')
@@ -64,7 +63,7 @@ class ControlSys:
         velocity_z = u[5]
         
         # Controller parameters
-        proportial_gain = 0.001
+        proportial_gain = 5
         integral_gain = 0
         derivative_gain = 0
 
@@ -83,8 +82,8 @@ class ControlSys:
         out += derivative_gain*rate_error
 
         # Limit Control
-        if(out>math.pi/2):
-            out = math.pi/2
+        if(out>math.pi/2.0):
+            out = math.pi/2.0
         elif(out<0):
             out = 0
 
