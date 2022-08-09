@@ -36,18 +36,18 @@ class ControlSurf:
         in the control surface frame"""
         # Dummy Values for the forces and position
         Rho = 1.2
-        A =  0.00325
+        A =  0.00325 # Fin area
         CD = self.getCD()
 
-        Fx = 0
+        Fx = 50
         #Fy = -50*math.sin(self.Phi)
-        Fy = -(Rho*A*CD*u*u)/2.0
+        Fy = -(Rho*A*CD*u*u)/2.0 # Force Calculation
         Fz = 0
         x = 0.1
         y = 0
         z = 0
 
-        # print(str(t) + "," + str(Fy) + "," + str(u))
+        print(str(t) + "," + str(Fy) + "," + str(u) + "," + str(self.Phi*180.0/math.pi))
         return [Fx, Fy, Fz, x, y, z]
 
     def getCD(self):

@@ -7,7 +7,7 @@ class ControlSys:
     def __init__(self, surfs):
         # surfs is a list containing each control surface object
         self.surfs = surfs
-        self.setpoint = 3000
+        self.setpoint = 2700 # target apogee
         self.hold_error = 0
         self.cuma_error = 0
     
@@ -63,7 +63,7 @@ class ControlSys:
         velocity_z = u[5]
         
         # Controller parameters
-        proportial_gain = 1
+        proportial_gain = 10
         integral_gain = 0
         derivative_gain = 0
 
