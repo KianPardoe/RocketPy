@@ -7,7 +7,7 @@ class ControlSys:
     def __init__(self, surfs):
         # surfs is a list containing each control surface object
         self.surfs = surfs
-        self.setpoint = 2700
+        self.setpoint = 3000
         self.hold_error = 0
         self.cuma_error = 0
     
@@ -31,7 +31,7 @@ class ControlSys:
         # Sum forces and moments for each control surface
         ForceMoments = np.zeros(6)
         for surf in self.surfs:
-            ForceMoments = np.add(ForceMoments, surf.getForceMoment(u[5]))
+            ForceMoments = np.add(ForceMoments, surf.getForceMoment(u[5],t))
 
         return ForceMoments.tolist()
     
@@ -63,7 +63,7 @@ class ControlSys:
         velocity_z = u[5]
         
         # Controller parameters
-        proportial_gain = 5
+        proportial_gain = 1
         integral_gain = 0
         derivative_gain = 0
 
