@@ -1379,7 +1379,7 @@ class Flight:
         ################################################################################### '''
         # Get forces imparted by Control Surfaces
         finAngles = self.rocket.controlSys.getAnglesSISOfromPID(t,u,self.z_accel)
-        forceAndMoments = self.rocket.controlSys.getForceMoment(t, u, finAngles)
+        forceAndMoments = self.rocket.controlSys.getForceMoment(t, u, finAngles, rho, compStreamVxB, compStreamVyB, compStreamVzB)
         R1 += forceAndMoments[0]
         R2 += forceAndMoments[1]
         R3 += forceAndMoments[2]

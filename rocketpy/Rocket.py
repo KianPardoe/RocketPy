@@ -163,11 +163,7 @@ class Rocket:
         None
         """
         # Define Control System
-        surf1 = ControlSurf(-0.2, 0.09, 0)
-        surf2 = ControlSurf(-0.2, 0.09, 0.5*math.pi)
-        surf3 = ControlSurf(-0.2, 0.09, math.pi)
-        surf4 = ControlSurf(-0.2, 0.09, 1.5*math.pi)
-        self.controlSys = ControlSys([surf1, surf2, surf3, surf4])
+        self.controlSys = ControlSys()
 
         # Define rocket inertia attributes in SI units
         self.mass = mass

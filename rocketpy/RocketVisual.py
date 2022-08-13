@@ -107,8 +107,8 @@ class RocketVisual:
             
             # Rotate and translate control surfaces from control surface frame to Global frame.
             for i in range(len(surfs)):
-                R_AR = self.R_AR(self.controlSys.surfs[i].Theta)
-                R_BA = self.R_BA(self.controlSys.surfs[i].Phi)
+                R_AR = self.R_AR(i * math.pi/2)
+                R_BA = self.R_BA(self.controlSys.finAngles[i])
 
                 # Rotate from control surface frame to rocket frame
                 self.rotateMesh(surfs[i], R_AR.dot(R_BA))

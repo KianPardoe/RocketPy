@@ -1,39 +1,77 @@
 import math
 import numpy as np
+from scipy import interpolate
 
 class ControlSys:
-    # Define Class Attributes
+
+    """
+    setpoint: float
+    This is the target altitude for the rocket in metres
     
-    def __init__(self, surfs):
-        # surfs is a list containing each control surface object
-        self.surfs = surfs
+    finAngles: list of floats
+    List of the 4 fin angles as measured from the vertical position, specified in Radians.
+    Fin ordering in the list is at 0, pi/2, pi and 3/2 pi around the rocket
+
+    A: float
+    Reference area for calculation of drag and lift forces specified in m^2
+
+    r: 1x3 np array 
+    Representing distance from centre of mass to the centre of pressure of the fin
+    aligned in the direction of the positive x axis of the rocket frame. Expressed in rocket frame
+    """
+    def __init__(self):
         self.setpoint = 2700
         self.hold_error = 0
         self.cuma_error = 0
+        self.finAngles = [0, 0, 0, 0]
+        self.A =  0.00325 # Fin reference area for Cd Cl
+        self.r = np.array([0.15, 0, -0.1])
+
+        # Read in Cd and Cl data
+        CdFile = open("data/proxima/proximaFinCD.csv", "r")
+        ClFile = open("data/proxima/proximaFinCL.csv", "r")
+
+        CdData = np.loadtxt(CdFile, delimiter = ",")
+        ClData = np.loadtxt(ClFile, delimiter = ",")
+
+        # Methods for interpolating Cd, Cl. Call self.getCd(0.2) to get Cd at 0.2 rad
+        self.getCd = interpolate.interp1d(CdData[:,0]* math.pi/180, CdData[:,1])
+        self.getCl = interpolate.interp1d(ClData[:,0]* math.pi/180, ClData[:,1])
+        
     
-    def getForceMoment(self, t, u, finAngles):
+    def getForceMoment(self, t, u, finAngles, rho, compStreamVxB, compStreamVyB, compStreamVzB):
         # Returns the vector [Fx Fy Fz Mx My Mz] in frame of Rocket
 
-        # Linear drag estimation
-        '''min_drag = 0.0
-        max_drag = 1.0
-        rho = 1.225
-        finArea = 0.005
-
-        drag_cof = 2*(max_drag-min_drag)*finAngles[0]/math.pi
-        drag_force = 0.5*rho*u[5]*u[5]*drag_cof*finArea
-        return [0, 0, -drag_force, 0, 0, 0]'''
-
         # Set new Angles for the control surfaces
-        for i in range(0,len(self.surfs)):
-            self.surfs[i].setAngle(finAngles[i])
+        self.finAngles = finAngles
+
+        # Forces
+        F = np.array([0, 0, 0])
+
+        # Moments
+        M = np.array([0, 0, 0])
 
         # Sum forces and moments for each control surface
-        ForceMoments = np.zeros(6)
-        for surf in self.surfs:
-            ForceMoments = np.add(ForceMoments, surf.getForceMoment(u[5]))
+        for i in range(len(self.finAngles)):
+            Cd = self.getCd(finAngles[i])
+            Cl = self.getCl(finAngles[i])
+            
+            # Drag and Lift Forces
+            Fz = (compStreamVzB/abs(compStreamVzB)) * 0.5 * Cd * self.A * rho * (compStreamVzB ** 2)
+            # Assuming Lift force is only generated for flow perpendicular to the axis of rotation of fin.
+            # This means only finAngle[0], finAngle[2] (those aligned with x axis) generate lift for stream velocity in y direction
+            if i % 2:
+                Fy = (compStreamVyB/abs(compStreamVyB)) * 0.5 * Cl * self.A * rho * (compStreamVyB ** 2)
+            else:
+                Fx = (compStreamVxB/abs(compStreamVxB)) * 0.5 * Cl * self.A * rho * (compStreamVxB ** 2)
 
-        return ForceMoments.tolist()
+            F = F + np.array([Fx, Fy, Fz])
+
+            theta = i * math.pi/2
+            R = np.array([[math.cos(theta), -math.sin(theta), 0], [math.sin(theta), math.cos(theta), 0], [0, 0, 1]])
+            M = M + np.cross((R.dot(self.r)), np.array([Fx, Fy, Fz]))
+
+        return np.concatenate((F, M), axis=None).tolist()
     
 
     def predictApogee(self,t,u,z_accel):
