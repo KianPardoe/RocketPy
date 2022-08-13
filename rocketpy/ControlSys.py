@@ -58,6 +58,8 @@ class ControlSys:
             
             # Drag and Lift Forces
             Fz = (compStreamVzB/abs(compStreamVzB)) * 0.5 * Cd * self.A * rho * (compStreamVzB ** 2)
+            Fx = 0
+            Fy = 0
             # Assuming Lift force is only generated for flow perpendicular to the axis of rotation of fin.
             # This means only finAngle[0], finAngle[2] (those aligned with x axis) generate lift for stream velocity in y direction
             if i % 2:
@@ -101,7 +103,7 @@ class ControlSys:
         velocity_z = u[5]
         
         # Controller parameters
-        proportial_gain = 5
+        proportial_gain = 10
         integral_gain = 0
         derivative_gain = 0
 

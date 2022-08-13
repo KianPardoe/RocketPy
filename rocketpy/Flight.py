@@ -2404,7 +2404,7 @@ class Flight:
         minY = min(self.y[:, 1])
         maxXY = max(maxX, maxY)
         minXY = min(minX, minY)
-
+        
         # Create figure
         fig1 = plt.figure(figsize=(9, 9))
         ax1 = plt.subplot(111, projection="3d")
