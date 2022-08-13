@@ -53,8 +53,8 @@ class ControlSys:
 
         # Sum forces and moments for each control surface
         for i in range(len(self.finAngles)):
-            Cd = self.getCd(finAngles[i])
-            Cl = self.getCl(finAngles[i])
+            Cd = self.getCd(abs(finAngles[i]))
+            Cl = self.getCl(abs(finAngles[i]))
             
             # Drag and Lift Forces
             Fz = (compStreamVzB/abs(compStreamVzB)) * 0.5 * Cd * self.A * rho * (compStreamVzB ** 2)
