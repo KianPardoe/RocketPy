@@ -90,7 +90,7 @@ class RocketVisual:
             # Create a copy of the mesh for each component of the rocket
             rocket = copy.deepcopy(self.rocketMesh)
             surfs = []
-            for i in range(len(self.controlSys.surfs)):
+            for i in range(4):
                 surfs.append(copy.deepcopy(self.surfMesh))
             
             # Rotate rocket body from Rocket frame to global frame.
@@ -106,7 +106,7 @@ class RocketVisual:
             vpl.view(focal_point=(0,0,0), camera_position=(0, 0, 0), camera_direction=(0,1500,-1500))
             
             # Rotate and translate control surfaces from control surface frame to Global frame.
-            for i in range(len(surfs)):
+            for i in range(4):
                 R_AR = self.R_AR(i * math.pi/2)
                 R_BA = self.R_BA(self.controlSys.finAngles[i])
 
@@ -115,7 +115,7 @@ class RocketVisual:
 
                 # Translate control surface to correct position on rocket
                 # multiply by 1000 to get r from m to mm
-                r = 1000*np.array([0.5*self.controlSys.surfs[i].D, 0, self.controlSys.surfs[i].h])
+                r = 1000*np.array([0.5*self.controlSys.r[0], 0, self.controlSys.r[2]])
                 self.translateMesh(surfs[i], R_AR.dot(r))
 
                 # Rotate control surface from Rocket frame to Global frame

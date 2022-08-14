@@ -103,7 +103,7 @@ class ControlSys:
         velocity_z = u[5]
         
         # Controller parameters
-        proportial_gain = 10
+        proportial_gain = 0.0001
         integral_gain = 0
         derivative_gain = 0
 
