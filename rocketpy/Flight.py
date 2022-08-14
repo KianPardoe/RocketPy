@@ -2464,9 +2464,9 @@ class Flight:
             self.postProcess()
 
         # Velocity and acceleration plots
-        fig2 = plt.figure(figsize=(9, 12))
+        fig2 = plt.figure(figsize=(9, 16))
         
-        ax1 = plt.subplot(511)
+        ax1 = plt.subplot(611)
         ax1.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax1.set_xlim(0, self.tFinal)
         ax1.set_title("Fin Angle | Fin Z Force")
@@ -2480,7 +2480,7 @@ class Flight:
         ax1up.set_ylabel("Fin Z Force (N)", color="#1f77b4")
         ax1up.tick_params("y", colors="#1f77b4")
 
-        ax2 = plt.subplot(512)
+        ax2 = plt.subplot(612)
         ax2.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax2.set_xlim(0, self.tFinal)
         ax2.set_title("Fin Angle | Z Acceleration (")
@@ -2494,7 +2494,7 @@ class Flight:
         ax2up.set_ylabel("Acceleration Z (m/s²)", color="#1f77b4")
         ax2up.tick_params("y", colors="#1f77b4")
 
-        ax3 = plt.subplot(513)
+        ax3 = plt.subplot(613)
         ax3.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax3.set_xlim(0, self.tFinal)
         ax3.set_title("Fin Angle | Velocity Z")
@@ -2508,7 +2508,7 @@ class Flight:
         ax3up.set_ylabel("Velocity Z (m/s)", color="#1f77b4")
         ax3up.tick_params("y", colors="#1f77b4")
                
-        ax4 = plt.subplot(514)
+        ax4 = plt.subplot(614)
         ax4.plot(tosliii[:,0], tosliii[:, 2], label="Fin X Force")
         ax4.plot(
             tosliii[:,0], tosliii[:, 3],
@@ -2522,23 +2522,39 @@ class Flight:
         ax4.set_title("Secondary Fin Drag Forces")
 
 
-        ax4 = plt.subplot(515)
-        ax4.plot(tosliii[:,0], tosliii[:, 4], label="Fin X Mom")
-        ax4.plot(
+        ax5 = plt.subplot(615)
+        ax5.plot(tosliii[:,0], tosliii[:, 4], label="Fin X Mom")
+        ax5.plot(
             tosliii[:,0], tosliii[:, 5],
             label="Fin Y Mom",
         )
-        ax4.plot(
+        ax5.plot(
             tosliii[:,0], tosliii[:, 6],
             label="Fin Z Mom",
         )
-        ax4.set_xlim(0, self.tFinal)
-        ax4.legend()
-        ax4.grid(True)
-        ax4.set_xlabel("Time (s)")
-        ax4.set_ylabel("Moments (Nm)")
-        ax4.set_title("Moments")
+        ax5.set_xlim(0, self.tFinal)
+        ax5.legend()
+        ax5.grid(True)
+        ax5.set_xlabel("Time (s)")
+        ax5.set_ylabel("Moments (Nm)")
+        ax5.set_title("Moments")
 
+
+        print("t =  {} | error = {}".format(tosliii[:,0], tosliii[:,7]))
+
+
+        ax6 = plt.subplot(616)
+        ax6.plot(tosliii[:,0], tosliii[:,7], color="#ff7f0e")
+        ax6.set_xlim(0, self.tFinal)
+        ax6.set_xlabel("Time (s)")
+        ax6.set_ylabel("Error (m)", color="#ff7f0e")
+        ax6.tick_params("y", colors="#ff7f0e")
+        ax6.grid(True)
+
+        ax6up = ax6.twinx()
+        ax6up.plot(tosliii[:,0], tosliii[:,8], color="#1f77b4")
+        ax6up.set_ylabel("Apogee (m)", color="#1f77b4")
+        ax6up.tick_params("y", colors="#1f77b4")
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
@@ -2605,19 +2621,19 @@ class Flight:
         ax3up.set_ylabel("Acceleration Z (m/s²)", color="#1f77b4")
         ax3up.tick_params("y", colors="#1f77b4")
 
-        ax4 = plt.subplot(411)
-        ax4.plot(self.speed[:, 0], self.speed[:, 1], color="#ff7f0e")
-        ax4.set_xlim(0, self.tFinal)
-        ax4.set_title("Velocity Magnitude | Acceleration Magnitude")
-        ax4.set_xlabel("Time (s)")
-        ax4.set_ylabel("Velocity (m/s)", color="#ff7f0e")
-        ax4.tick_params("y", colors="#ff7f0e")
-        ax4.grid(True)
+        ax5 = plt.subplot(411)
+        ax5.plot(self.speed[:, 0], self.speed[:, 1], color="#ff7f0e")
+        ax5.set_xlim(0, self.tFinal)
+        ax5.set_title("Velocity Magnitude | Acceleration Magnitude")
+        ax5.set_xlabel("Time (s)")
+        ax5.set_ylabel("Velocity (m/s)", color="#ff7f0e")
+        ax5.tick_params("y", colors="#ff7f0e")
+        ax5.grid(True)
 
-        ax4up = ax4.twinx()
-        ax4up.plot(self.acceleration[:, 0], self.acceleration[:, 1], color="#1f77b4")
-        ax4up.set_ylabel("Acceleration (m/s²)", color="#1f77b4")
-        ax4up.tick_params("y", colors="#1f77b4")
+        ax5up = ax5.twinx()
+        ax5up.plot(self.acceleration[:, 0], self.acceleration[:, 1], color="#1f77b4")
+        ax5up.set_ylabel("Acceleration (m/s²)", color="#1f77b4")
+        ax5up.tick_params("y", colors="#1f77b4")
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
@@ -2677,13 +2693,13 @@ class Flight:
         ax3.set_title("Euler Nutation Angle")
         ax3.grid(True)
 
-        ax4 = plt.subplot(414)
-        ax4.plot(self.phi[:, 0], self.phi[:, 1], label="φ - Spin")
-        ax4.set_xlim(0, eventTime)
-        ax4.set_xlabel("Time (s)")
-        ax4.set_ylabel("φ (°)")
-        ax4.set_title("Euler Spin Angle")
-        ax4.grid(True)
+        ax5 = plt.subplot(414)
+        ax5.plot(self.phi[:, 0], self.phi[:, 1], label="φ - Spin")
+        ax5.set_xlim(0, eventTime)
+        ax5.set_xlabel("Time (s)")
+        ax5.set_ylabel("φ (°)")
+        ax5.set_title("Euler Spin Angle")
+        ax5.grid(True)
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
@@ -2947,16 +2963,16 @@ class Flight:
         ax3.set_title("Aerodynamic Bending Resultant Moment")
         ax3.grid()
 
-        ax4 = plt.subplot(414)
-        ax4.plot(
+        ax5 = plt.subplot(414)
+        ax5.plot(
             self.aerodynamicSpinMoment[:eventTimeIndex, 0],
             self.aerodynamicSpinMoment[:eventTimeIndex, 1],
         )
-        ax4.set_xlim(0, eventTime)
-        ax4.set_xlabel("Time (s)")
-        ax4.set_ylabel("Spin Moment (N m)")
-        ax4.set_title("Aerodynamic Spin Moment")
-        ax4.grid()
+        ax5.set_xlim(0, eventTime)
+        ax5.set_xlabel("Time (s)")
+        ax5.set_ylabel("Spin Moment (N m)")
+        ax5.set_title("Aerodynamic Spin Moment")
+        ax5.grid()
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
@@ -3041,15 +3057,15 @@ class Flight:
         ax3.legend()
         ax3.grid()
 
-        ax4 = plt.subplot(414)
-        ax4.plot(self.dragPower[:, 0], -self.dragPower[:, 1], label="|Drag Power|")
-        ax4.set_xlim(0, self.apogeeTime if self.apogeeTime != 0.0 else self.tFinal)
+        ax5 = plt.subplot(414)
+        ax5.plot(self.dragPower[:, 0], -self.dragPower[:, 1], label="|Drag Power|")
+        ax5.set_xlim(0, self.apogeeTime if self.apogeeTime != 0.0 else self.tFinal)
         ax3.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
-        ax4.set_title("Drag Absolute Power")
-        ax4.set_xlabel("Time (s)")
-        ax4.set_ylabel("Power (W)")
-        ax4.legend()
-        ax4.grid()
+        ax5.set_title("Drag Absolute Power")
+        ax5.set_xlabel("Time (s)")
+        ax5.set_ylabel("Power (W)")
+        ax5.legend()
+        ax5.grid()
 
         plt.subplots_adjust(hspace=1)
         plt.show()
@@ -3116,16 +3132,16 @@ class Flight:
         ax3.set_ylabel("Pressure (Pa)")
         ax3.grid()
 
-        ax4 = plt.subplot(414)
-        ax4.plot(self.angleOfAttack[:, 0], self.angleOfAttack[:, 1])
-        ax4.set_xlim(
+        ax5 = plt.subplot(414)
+        ax5.plot(self.angleOfAttack[:, 0], self.angleOfAttack[:, 1])
+        ax5.set_xlim(
             self.outOfRailTime, 10 * self.outOfRailTime + 1
         )  # +1 Prevents problem when self.outOfRailTime=0
-        ax4.set_ylim(0, self.angleOfAttack(self.outOfRailTime))
-        ax4.set_title("Angle of Attack")
-        ax4.set_xlabel("Time (s)")
-        ax4.set_ylabel("Angle of Attack (°)")
-        ax4.grid()
+        ax5.set_ylim(0, self.angleOfAttack(self.outOfRailTime))
+        ax5.set_title("Angle of Attack")
+        ax5.set_xlabel("Time (s)")
+        ax5.set_ylabel("Angle of Attack (°)")
+        ax5.grid()
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()

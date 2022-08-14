@@ -926,7 +926,7 @@ class Rocket:
         # Print rocket geometrical parameters
         print("\nGeometrical Parameters")
         print("Rocket Radius: " + str(self.radius) + " m")
-
+        
         # Print rocket aerodynamics quantities
         print("\nAerodynamics Stability")
         print("Initial Static Margin: " + "{:.3f}".format(self.staticMargin(0)) + " c")
