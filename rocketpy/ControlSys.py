@@ -95,7 +95,7 @@ class ControlSys:
         # print('Acceleration: ' +  str(a))
         # print('Apogee: ' +  str(apogee))
         # print('-------------------')
-        #print(apogee)
+        print(apogee)
         return apogee
         
 
@@ -137,9 +137,10 @@ class ControlSys:
         out = proportial_gain*error
         out -= integral_gain*error_integral
         out -= derivative_gain*rate_error
-        #print(proportial_gain*error)
-        #print(-integral_gain*error_integral)
-        #print(-derivative_gain*rate_error)
+        print(proportial_gain*error)
+        print(-integral_gain*error_integral)
+        print(-derivative_gain*rate_error)
+
         # Limit Control
         if(out>math.pi/2.0):
             out = math.pi/2.0
