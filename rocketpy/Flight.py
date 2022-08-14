@@ -612,7 +612,7 @@ class Flight:
         self.initialSolution = initialSolution
         self.timeOvershoot = timeOvershoot
         self.terminateOnApogee = terminateOnApogee
-        self 
+        self.tmax = 0 
         # Visualistaion variables
         self.visualiseRocket = visualiseRocket
 
@@ -1391,9 +1391,10 @@ class Flight:
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
         
+        if(t> self.tmax):
+            self.tmax = t
+            self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4] ,forceAndMoments[5],errorHeight,predHeight])
 
-        self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4] ,forceAndMoments[5],errorHeight,predHeight])
-       
         # If visualiseRocket==True then save frame for visualisation
         if self.visualiseRocket:
             self.rocketVis.makeRocketVisFrame(t, K)
