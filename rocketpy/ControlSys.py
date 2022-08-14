@@ -28,6 +28,7 @@ class ControlSys:
         self.r = np.array([0.15, 0, -0.1])
         self.cut = 0
         self.apog = 0
+        self.pred = 3000
 
         # Read in Cd and Cl data
         CdFile = open("data/proxima/proximaFinCD.csv", "r")
@@ -68,7 +69,9 @@ class ControlSys:
                 Fy = (compStreamVyB/abs(compStreamVyB)) * 0.5 * Cl * self.A * rho * (compStreamVyB ** 2)
             else:
                 Fx = (compStreamVxB/abs(compStreamVxB)) * 0.5 * Cl * self.A * rho * (compStreamVxB ** 2)
-
+            # No lift assumption
+            Fx = 0
+            Fy = 0
             F = F + np.array([Fx, Fy, Fz])
 
             theta = i * math.pi/2
@@ -92,7 +95,7 @@ class ControlSys:
         # print('Acceleration: ' +  str(a))
         # print('Apogee: ' +  str(apogee))
         # print('-------------------')
-        print(apogee)
+        #print(apogee)
         return apogee
         
 
@@ -112,19 +115,20 @@ class ControlSys:
         if(position_z - 722 < self.apog - 100):
             self.cut = self.cut + 1
 
-        if(self.cut>3):
+        if(self.cut>3 or t < 5):
             return [0,0,0,0]    
         
         # Controller parameters
-        proportial_gain = 0.5
-        integral_gain = 0#0.0000001
-        derivative_gain = 0.1
+        proportial_gain = 0.01
+        integral_gain = 0
+        derivative_gain = 0
         # Term calculation
-        
-        error = self.predictApogee(t,u,z_accel) - self.setpoint
+        alpha = 1
+        self.pred = alpha*self.predictApogee(t,u,z_accel) + (1-alpha)*self.pred
+        error = self.pred - self.setpoint
         error_integral = self.cuma_error + error
         rate_error = error - self.hold_error
-        
+        #print(self.pred )
         # Update Error Terms for store
         self.cuma_error = error_integral
         self.hold_error = error
@@ -133,15 +137,15 @@ class ControlSys:
         out = proportial_gain*error
         out -= integral_gain*error_integral
         out -= derivative_gain*rate_error
-        print(proportial_gain*error)
-        print(-integral_gain*error_integral)
-        print(-derivative_gain*rate_error)
-
+        #print(proportial_gain*error)
+        #print(-integral_gain*error_integral)
+        #print(-derivative_gain*rate_error)
         # Limit Control
         if(out>math.pi/2.0):
             out = math.pi/2.0
         elif(out<0):
             out = 0
+        print(out)
         return [-out,out,out,-out]
 
     def getAnglesLQR(self, position , velocity, orientation, angular_velocity):
