@@ -43,7 +43,9 @@ class ControlSys:
         self.getCd = interpolate.interp1d(CdData[:,0]* math.pi/180, CdData[:,1])
         self.getCl = interpolate.interp1d(ClData[:,0]* math.pi/180, ClData[:,1])
         
-    
+    def getError(self,t,u,z_accel):
+        return self.setpoint - self.predictApogee(t,u,z_accel)
+
     def getForceMoment(self, t, u, finAngles, rho, compStreamVxB, compStreamVyB, compStreamVzB):
         # Returns the vector [Fx Fy Fz Mx My Mz] in frame of Rocket
 
@@ -79,7 +81,6 @@ class ControlSys:
             theta = i * math.pi/2
             R = np.array([[math.cos(theta), -math.sin(theta), 0], [math.sin(theta), math.cos(theta), 0], [0, 0, 1]])
             M = M + np.cross((R.dot(self.r)), np.array([Fx, Fy, Fz]))
-        print(np.concatenate((F, M), axis=None).tolist())
         return np.concatenate((F, M), axis=None).tolist()
     
 
@@ -123,7 +124,7 @@ class ControlSys:
         # Controller parameters
         proportial_gain = 0.01
         integral_gain = 0
-        derivative_gain = 0.01
+        derivative_gain = 0
         # Term calculation
         alpha = 1
         self.pred = alpha*self.predictApogee(t,u,z_accel) + (1-alpha)*self.pred

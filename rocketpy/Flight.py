@@ -1380,7 +1380,9 @@ class Flight:
         ################################################################################### '''
         # Get forces imparted by Control Surfaces
         finAngles = self.rocket.controlSys.getAnglesSISOfromPID(t,u,self.z_accel)
-        
+        errorHeight = self.rocket.controlSys.getError(t,u,self.z_accel)
+        predHeight = self.rocket.controlSys.predictApogee(t,u,self.z_accel)
+
         forceAndMoments = self.rocket.controlSys.getForceMoment(t, u, finAngles, rho, compStreamVxB, compStreamVyB, compStreamVzB)
         R1 += forceAndMoments[0]
         R2 += forceAndMoments[1]
@@ -1389,7 +1391,8 @@ class Flight:
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
         
-        self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4] ,forceAndMoments[5]])
+
+        self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4] ,forceAndMoments[5],errorHeight,predHeight])
        
         # If visualiseRocket==True then save frame for visualisation
         if self.visualiseRocket:
