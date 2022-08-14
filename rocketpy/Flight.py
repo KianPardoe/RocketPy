@@ -1389,7 +1389,7 @@ class Flight:
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
         self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],forceAndMoments[2]])
-       
+        
         # If visualiseRocket==True then save frame for visualisation
         if self.visualiseRocket:
             self.rocketVis.makeRocketVisFrame(t, K)
