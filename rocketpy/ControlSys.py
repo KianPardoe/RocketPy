@@ -20,7 +20,7 @@ class ControlSys:
     aligned in the direction of the positive x axis of the rocket frame. Expressed in rocket frame
     """
     def __init__(self):
-        self.setpoint = 2700
+        self.setpoint = 2700 # above ground level
         self.hold_error = 0
         self.cuma_error = 0
         self.finAngles = [0, 0, 0, 0]

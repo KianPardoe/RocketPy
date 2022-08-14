@@ -529,7 +529,8 @@ class Flight:
         timeOvershoot=True,
         verbose=False,
         visualiseRocket=False,
-        z_accel = 0
+        z_accel = 0,
+        finplots=[]
     ):
         """Run a trajectory simulation.
 
@@ -1204,7 +1205,7 @@ class Flight:
         # Hey! We will finish this function later, now we just can use uDot
         return self.uDot(t, u, postProcessing=postProcessing)
 
-    def uDot(self, t, u, postProcessing=False):
+    def uDot(self, t, u, finplots=[0 0 0 0], postProcessing=False):
         """Calculates derivative of u state vector with respect to time
         when rocket is flying in 6 DOF motion during ascent out of rail
         and descent without parachute.
@@ -1226,9 +1227,8 @@ class Flight:
             State vector defined by uDot = [vx, vy, vz, ax, ay, az,
             e0Dot, e1Dot, e2Dot, e3Dot, alpha1, alpha2, alpha3].
         """
-
         # Retrieve integration data
-        x, y, z, vx, vy, vz, e0, e1, e2, e3, omega1, omega2, omega3 = u
+        x, y, z, vx, vy, vz, e0, e1, e2, e3, omega1, omega2, omega3= u
         # Determine lift force and moment
         R1, R2 = 0, 0
         M1, M2, M3 = 0, 0, 0
@@ -1379,6 +1379,7 @@ class Flight:
         ################################################################################### '''
         # Get forces imparted by Control Surfaces
         finAngles = self.rocket.controlSys.getAnglesSISOfromPID(t,u,self.z_accel)
+        
         forceAndMoments = self.rocket.controlSys.getForceMoment(t, u, finAngles, rho, compStreamVxB, compStreamVyB, compStreamVzB)
         R1 += forceAndMoments[0]
         R2 += forceAndMoments[1]
@@ -1386,7 +1387,9 @@ class Flight:
         M1 += forceAndMoments[3]
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
-        
+       
+        finplots.append=[finAngles[1], forceAndMoments[0], forceAndMoments[1], forceAndMoments[2]]
+       
         # If visualiseRocket==True then save frame for visualisation
         if self.visualiseRocket:
             self.rocketVis.makeRocketVisFrame(t, K)
@@ -1450,7 +1453,7 @@ class Flight:
             e3Dot,
             alpha1,
             alpha2,
-            alpha3,
+            alpha3
         ]
 
         if postProcessing:
@@ -1470,7 +1473,7 @@ class Flight:
             self.speedOfSound.append([t, self.env.speedOfSound(z)])
 
         return uDot
-
+        
     def uDotParachute(self, t, u, postProcessing=False):
         """Calculates derivative of u state vector with respect to time
         when rocket is flying under parachute. A 3 DOF approximation is
@@ -2043,7 +2046,8 @@ class Flight:
         self.angleOfAttack = Function(
             angleOfAttack, "Time (s)", "Angle Of Attack (°)", "linear"
         )
-
+       
+        
         # Post process other quantities
 
         # Transform parachute sensor feed into functions
@@ -2438,6 +2442,57 @@ class Flight:
         plt.show()
 
         return None
+        
+    def plotFinData(self):
+        """Prints out all fin graphs available about the Flight
+
+        Parameters
+        ----------
+        None
+
+        Return
+        ------
+        None
+        """
+        # Post-process results
+        if self.postProcessed is False:
+            self.postProcess()
+
+        # Velocity and acceleration plots
+        fig2 = plt.figure(figsize=(9, 6))
+
+        ax1 = plt.subplot(212)
+        ax1.plot(self.ax[:, 0], self.finplots[:, 1], color="#ff7f0e")
+        ax1.set_xlim(0, self.tFinal)
+        ax1.set_title("Fin Angle | Fin Force")
+        ax1.set_xlabel("Time (s)")
+        ax1.set_ylabel("Fin Angle (rad)", color="#ff7f0e")
+        ax1.tick_params("y", colors="#ff7f0e")
+        ax1.grid(True)
+
+        ax1up = ax1.twinx()
+        ax1up.plot(self.ax[:, 0], self.ax[:, 1], color="#1f77b4")
+        ax1up.set_ylabel("Fin Force (N)", color="#1f77b4")
+        ax1up.tick_params("y", colors="#1f77b4")
+
+        ax2 = plt.subplot(211)
+        ax2.plot(self.vy[:, 0], self.vy[:, 1], color="#ff7f0e")
+        ax2.set_xlim(0, self.tFinal)
+        ax2.set_title("Velocity Y | Acceleration Y")
+        ax2.set_xlabel("Time (s)")
+        ax2.set_ylabel("Velocity Y (m/s)", color="#ff7f0e")
+        ax2.tick_params("y", colors="#ff7f0e")
+        ax2.grid(True)
+
+        ax2up = ax2.twinx()
+        ax2up.plot(self.ay[:, 0], self.ay[:, 1], color="#1f77b4")
+        ax2up.set_ylabel("Acceleration Y (m/s²)", color="#1f77b4")
+        ax2up.tick_params("y", colors="#1f77b4")
+
+        plt.subplots_adjust(hspace=0.5)
+        plt.show()
+        return None
+
 
     def plotLinearKinematicsData(self):
         """Prints out all Kinematics graphs available about the Flight
@@ -2583,6 +2638,8 @@ class Flight:
         plt.show()
 
         return None
+
+
 
     def plotFlightPathAngleData(self):
         """Prints out Flight path and Rocket Attitude angle graphs available
@@ -3375,6 +3432,9 @@ class Flight:
 
         print("\n\nTrajectory 3d Plot\n")
         self.plot3dTrajectory()
+        
+        print("\n\nFin Data\n")
+        self.plotFinData()
 
         print("\n\nTrajectory Kinematic Plots\n")
         self.plotLinearKinematicsData()
