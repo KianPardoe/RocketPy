@@ -20,12 +20,12 @@ class ControlSys:
     aligned in the direction of the positive x axis of the rocket frame. Expressed in rocket frame
     """
     def __init__(self):
-        self.setpoint = 2700 # above ground level
+        self.setpoint = 100 # above ground level
         self.hold_error = 0
         self.cuma_error = 0
         self.finAngles = [0, 0, 0, 0]
         self.A =  0.00325 # Fin reference area for Cd Cl
-        self.r = np.array([0.15, 0, -0.1])
+        self.r = np.array([25/1000, 0, 3/1000])
         self.cut = 0
         self.apog = 0
 

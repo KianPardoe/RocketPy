@@ -1388,7 +1388,8 @@ class Flight:
         M1 += forceAndMoments[3]
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
-        self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],forceAndMoments[2]])
+        
+        self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4] ,forceAndMoments[5]])
        
         # If visualiseRocket==True then save frame for visualisation
         if self.visualiseRocket:
@@ -2462,7 +2463,7 @@ class Flight:
         # Velocity and acceleration plots
         fig2 = plt.figure(figsize=(9, 12))
         
-        ax1 = plt.subplot(411)
+        ax1 = plt.subplot(511)
         ax1.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax1.set_xlim(0, self.tFinal)
         ax1.set_title("Fin Angle | Fin Z Force")
@@ -2476,7 +2477,7 @@ class Flight:
         ax1up.set_ylabel("Fin Z Force (N)", color="#1f77b4")
         ax1up.tick_params("y", colors="#1f77b4")
 
-        ax2 = plt.subplot(412)
+        ax2 = plt.subplot(512)
         ax2.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax2.set_xlim(0, self.tFinal)
         ax2.set_title("Fin Angle | Z Acceleration (")
@@ -2490,7 +2491,7 @@ class Flight:
         ax2up.set_ylabel("Acceleration Z (m/s²)", color="#1f77b4")
         ax2up.tick_params("y", colors="#1f77b4")
 
-        ax3 = plt.subplot(413)
+        ax3 = plt.subplot(513)
         ax3.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax3.set_xlim(0, self.tFinal)
         ax3.set_title("Fin Angle | Velocity Z")
@@ -2504,7 +2505,7 @@ class Flight:
         ax3up.set_ylabel("Velocity Z (m/s)", color="#1f77b4")
         ax3up.tick_params("y", colors="#1f77b4")
                
-        ax4 = plt.subplot(414)
+        ax4 = plt.subplot(514)
         ax4.plot(tosliii[:,0], tosliii[:, 2], label="Fin X Force")
         ax4.plot(
             tosliii[:,0], tosliii[:, 3],
@@ -2516,6 +2517,24 @@ class Flight:
         ax4.set_xlabel("Time (s)")
         ax4.set_ylabel("Force (N)")
         ax4.set_title("Secondary Fin Drag Forces")
+
+
+        ax4 = plt.subplot(515)
+        ax4.plot(tosliii[:,0], tosliii[:, 4], label="Fin X Mom")
+        ax4.plot(
+            tosliii[:,0], tosliii[:, 5],
+            label="Fin Y Mom",
+        )
+        ax4.plot(
+            tosliii[:,0], tosliii[:, 6],
+            label="Fin Z Mom",
+        )
+        ax4.set_xlim(0, self.tFinal)
+        ax4.legend()
+        ax4.grid(True)
+        ax4.set_xlabel("Time (s)")
+        ax4.set_ylabel("Moments (Nm)")
+        ax4.set_title("Moments")
 
 
         plt.subplots_adjust(hspace=0.5)
