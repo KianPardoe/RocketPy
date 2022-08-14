@@ -26,6 +26,8 @@ class ControlSys:
         self.finAngles = [0, 0, 0, 0]
         self.A =  0.00325 # Fin reference area for Cd Cl
         self.r = np.array([0.15, 0, -0.1])
+        self.cut = 0
+        self.apog = 0
 
         # Read in Cd and Cl data
         CdFile = open("data/proxima/proximaFinCD.csv", "r")
@@ -84,12 +86,13 @@ class ControlSys:
         g = -9.81
         a = z_accel + g
         # Calculate apogee
-        apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p
+        apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p - 722
         # print('-------------------')
         # print('Velocity: ' + str(v))
         # print('Acceleration: ' +  str(a))
         # print('Apogee: ' +  str(apogee))
         # print('-------------------')
+        print(apogee)
         return apogee
         
 
@@ -101,13 +104,23 @@ class ControlSys:
         # Input parsing
         position_z = u[2]
         velocity_z = u[5]
+
+        # Cut Logic
+        if(position_z - 722> self.apog):
+            self.apog = position_z - 722
+
+        if(position_z - 722 < self.apog - 100):
+            self.cut = self.cut + 1
+
+        if(self.cut>3):
+            return [0,0,0,0]    
         
         # Controller parameters
-        proportial_gain = 10
-        integral_gain = 0
-        derivative_gain = 0
-
+        proportial_gain = 0.5
+        integral_gain = 0#0.0000001
+        derivative_gain = 0.1
         # Term calculation
+        
         error = self.predictApogee(t,u,z_accel) - self.setpoint
         error_integral = self.cuma_error + error
         rate_error = error - self.hold_error
@@ -118,15 +131,17 @@ class ControlSys:
 
         # Output calculation using PID
         out = proportial_gain*error
-        out += integral_gain*error_integral
-        out += derivative_gain*rate_error
+        out -= integral_gain*error_integral
+        out -= derivative_gain*rate_error
+        print(proportial_gain*error)
+        print(-integral_gain*error_integral)
+        print(-derivative_gain*rate_error)
 
         # Limit Control
         if(out>math.pi/2.0):
             out = math.pi/2.0
         elif(out<0):
             out = 0
-
         return [-out,out,out,-out]
 
     def getAnglesLQR(self, position , velocity, orientation, angular_velocity):
