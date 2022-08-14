@@ -2539,10 +2539,6 @@ class Flight:
         ax5.set_ylabel("Moments (Nm)")
         ax5.set_title("Moments")
 
-
-        print("t =  {} | error = {}".format(tosliii[:,0], tosliii[:,7]))
-
-
         ax6 = plt.subplot(616)
         ax6.plot(tosliii[:,0], tosliii[:,7], color="#ff7f0e")
         ax6.set_xlim(0, self.tFinal)

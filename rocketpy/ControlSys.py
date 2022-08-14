@@ -19,12 +19,13 @@ class ControlSys:
     Representing distance from centre of mass to the centre of pressure of the fin
     aligned in the direction of the positive x axis of the rocket frame. Expressed in rocket frame
     """
-    def __init__(self):
+    def __init__(self,elevation):
         self.setpoint = 100 # above ground level
         self.hold_error = 0
         self.cuma_error = 0
         self.finAngles = [0, 0, 0, 0]
         self.A =  0.000638 # Fin reference area for Cd Cl
+        self.elevation = elevation
                     
         self.r = np.array([25/1000, 0, 3/1000])
 
@@ -90,16 +91,16 @@ class ControlSys:
         p = u[2]
         v = u[5]
         g = -9.81
-        a = z_accel + g
+        a = z_accel
         # Calculate apogee
-        apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p - 722
+        apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p - self.elevation
   
         # print('-------------------')
         # print('Velocity: ' + str(v))
         # print('Acceleration: ' +  str(a))
         # print('Apogee: ' +  str(apogee))
         # print('-------------------')
-        #print(apogee)
+        print(round(t,2),round(a,2),round( v ,2),round(self.elevation,2),round(apogee,2),round( p- self.elevation,2))
         return apogee
         
 

@@ -115,8 +115,9 @@ class Rocket:
         radius,
         distanceRocketNozzle,
         distanceRocketPropellant,
+        elevation,
         powerOffDrag,
-        powerOnDrag,
+        powerOnDrag
     ):
         """Initializes Rocket class, process inertial, geometrical and
         aerodynamic parameters.
@@ -163,7 +164,7 @@ class Rocket:
         None
         """
         # Define Control System
-        self.controlSys = ControlSys()
+        self.controlSys = ControlSys(elevation)
 
         # Define rocket inertia attributes in SI units
         self.mass = mass
