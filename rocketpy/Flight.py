@@ -529,8 +529,7 @@ class Flight:
         timeOvershoot=True,
         verbose=False,
         visualiseRocket=False,
-        z_accel = 0,
-        finplots=[]
+
     ):
         """Run a trajectory simulation.
 
@@ -598,6 +597,8 @@ class Flight:
 
         # Save rocket, parachutes, environment, maximum simulation time
         # and termination events
+        self.z_accel = 0
+        self.finplots = []
         self.env = environment
         self.rocket = rocket
         self.parachutes = self.rocket.parachutes[:]
@@ -611,7 +612,7 @@ class Flight:
         self.initialSolution = initialSolution
         self.timeOvershoot = timeOvershoot
         self.terminateOnApogee = terminateOnApogee
-        
+        self 
         # Visualistaion variables
         self.visualiseRocket = visualiseRocket
 
@@ -1205,7 +1206,7 @@ class Flight:
         # Hey! We will finish this function later, now we just can use uDot
         return self.uDot(t, u, postProcessing=postProcessing)
 
-    def uDot(self, t, u, finplots=[0 0 0 0], postProcessing=False):
+    def uDot(self, t, u, postProcessing=False):
         """Calculates derivative of u state vector with respect to time
         when rocket is flying in 6 DOF motion during ascent out of rail
         and descent without parachute.
@@ -1387,8 +1388,7 @@ class Flight:
         M1 += forceAndMoments[3]
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
-       
-        finplots.append=[finAngles[1], forceAndMoments[0], forceAndMoments[1], forceAndMoments[2]]
+        self.finplots.append([t,finAngles[1]])
        
         # If visualiseRocket==True then save frame for visualisation
         if self.visualiseRocket:
@@ -2454,15 +2454,16 @@ class Flight:
         ------
         None
         """
+        tosliii=np.array(self.finplots)
         # Post-process results
         if self.postProcessed is False:
             self.postProcess()
 
         # Velocity and acceleration plots
         fig2 = plt.figure(figsize=(9, 6))
-
+        
         ax1 = plt.subplot(212)
-        ax1.plot(self.ax[:, 0], self.finplots[:, 1], color="#ff7f0e")
+        ax1.plot(tosliii[:,0], tosliii[:, 1], color="#ff7f0e")
         ax1.set_xlim(0, self.tFinal)
         ax1.set_title("Fin Angle | Fin Force")
         ax1.set_xlabel("Time (s)")
