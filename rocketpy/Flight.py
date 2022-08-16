@@ -7,6 +7,7 @@ __license__ = "MIT"
 import re
 import math
 import bisect
+from sys import maxsize
 import warnings
 import time
 from datetime import datetime, timedelta
@@ -1380,8 +1381,13 @@ class Flight:
         ################################################################################### '''
         # Get forces imparted by Control Surfaces
         finAngles = self.rocket.controlSys.getAnglesSISOfromPID(t,u,self.z_accel)
-        errorHeight = self.rocket.controlSys.getError(t,u,self.z_accel)
+              
         predHeight = self.rocket.controlSys.predictApogee(t,u,self.z_accel)
+
+        vt=math.sqrt((2*M*self.env.g/(rho*self.rocket.area * (dragCoeff))))
+        predHeight2 = self.rocket.controlSys.predictApogee2(t,u,vt)
+
+        errorHeight = self.rocket.controlSys.getError(t,u,self.z_accel)
 
         forceAndMoments = self.rocket.controlSys.getForceMoment(t, u, finAngles, rho, compStreamVxB, compStreamVyB, compStreamVzB)
         R1 += forceAndMoments[0]
@@ -1391,9 +1397,9 @@ class Flight:
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
         
-        if(t> self.tmax):
-            self.tmax = t
-            self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4] ,forceAndMoments[5],errorHeight,predHeight])
+        self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],
+                            forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4],
+                            forceAndMoments[5],float(errorHeight),predHeight,predHeight2])
 
         # If visualiseRocket==True then save frame for visualisation
         if self.visualiseRocket:
@@ -2107,72 +2113,8 @@ class Flight:
             eventTime = self.tFinal
             eventTimeIndex = -1
 
-        # Print surface wind conditions
-        print("Surface Wind Conditions\n")
-        print("Frontal Surface Wind Speed: {:.2f} m/s".format(self.frontalSurfaceWind))
-        print("Lateral Surface Wind Speed: {:.2f} m/s".format(self.lateralSurfaceWind))
-
-        # Print out of rail conditions
-        print("\n\n Rail Departure State\n")
-        print("Rail Departure Time: {:.3f} s".format(self.outOfRailTime))
-        print("Rail Departure Velocity: {:.3f} m/s".format(self.outOfRailVelocity))
-        print(
-            "Rail Departure Static Margin: {:.3f} c".format(
-                self.staticMargin(self.outOfRailTime)
-            )
-        )
-        print(
-            "Rail Departure Angle of Attack: {:.3f}°".format(
-                self.angleOfAttack(self.outOfRailTime)
-            )
-        )
-        print(
-            "Rail Departure Thrust-Weight Ratio: {:.3f}".format(
-                self.rocket.thrustToWeight(self.outOfRailTime)
-            )
-        )
-        print(
-            "Rail Departure Reynolds Number: {:.3e}".format(
-                self.ReynoldsNumber(self.outOfRailTime)
-            )
-        )
-
-        # Print burnOut conditions
-        print("\n\nBurnOut State\n")
-        print("BurnOut time: {:.3f} s".format(self.rocket.motor.burnOutTime))
-        print(
-            "Altitude at burnOut: {:.3f} m (AGL)".format(
-                self.z(self.rocket.motor.burnOutTime) - self.env.elevation
-            )
-        )
-        print(
-            "Rocket velocity at burnOut: {:.3f} m/s".format(
-                self.speed(self.rocket.motor.burnOutTime)
-            )
-        )
-        print(
-            "Freestream velocity at burnOut: {:.3f} m/s".format(
-                (
-                    self.streamVelocityX(self.rocket.motor.burnOutTime) ** 2
-                    + self.streamVelocityY(self.rocket.motor.burnOutTime) ** 2
-                    + self.streamVelocityZ(self.rocket.motor.burnOutTime) ** 2
-                )
-                ** 0.5
-            )
-        )
-        print(
-            "Mach Number at burnOut: {:.3f}".format(
-                self.MachNumber(self.rocket.motor.burnOutTime)
-            )
-        )
-        print(
-            "Kinetic energy at burnOut: {:.3e} J".format(
-                self.kineticEnergy(self.rocket.motor.burnOutTime)
-            )
-        )
-
         # Print apogee conditions
-        print("\n\nApogee\n")
+        print("Apogee----------------")
         print(
             "Apogee Altitude: {:.3f} m (ASL) | {:.3f} m (AGL)".format(
                 self.apogee, self.apogee - self.env.elevation
@@ -2182,7 +2124,7 @@ class Flight:
         print("Apogee Freestream Speed: {:.3f} m/s".format(self.apogeeFreestreamSpeed))
 
         # Print events registered
-        print("\n\nEvents\n")
+        print("\nEvents----------------")
         if len(self.parachuteEvents) == 0:
             print("No Parachute Events Were Triggered.")
         for event in self.parachuteEvents:
@@ -2209,7 +2151,7 @@ class Flight:
 
         # Print impact conditions
         if len(self.impactState) != 0:
-            print("\n\nImpact\n")
+            print("\nImpact----------------")
             print("X Impact: {:.3f} m".format(self.xImpact))
             print("Y Impact: {:.3f} m".format(self.yImpact))
             print("Time of Impact: {:.3f} s".format(self.tFinal))
@@ -2220,7 +2162,7 @@ class Flight:
             print("Altitude: {:.3f} m".format(self.solution[-1][3]))
 
         # Print maximum values
-        print("\n\nMaximum Values\n")
+        print("\nMaximum Values----------------")
         print(
             "Maximum Speed: {:.3f} m/s at {:.2f} s".format(
                 self.maxSpeed, self.maxSpeedTime
@@ -2271,6 +2213,74 @@ class Flight:
                 self.maxRailButton2ShearForce
             )
         )
+
+        # Print burnOut conditions
+        print("\nBurnOut State----------------")
+        print("BurnOut time: {:.3f} s".format(self.rocket.motor.burnOutTime))
+        print(
+            "Altitude at burnOut: {:.3f} m (AGL)".format(
+                self.z(self.rocket.motor.burnOutTime) - self.env.elevation
+            )
+        )
+        print(
+            "Rocket velocity at burnOut: {:.3f} m/s".format(
+                self.speed(self.rocket.motor.burnOutTime)
+            )
+        )
+        print(
+            "Freestream velocity at burnOut: {:.3f} m/s".format(
+                (
+                    self.streamVelocityX(self.rocket.motor.burnOutTime) ** 2
+                    + self.streamVelocityY(self.rocket.motor.burnOutTime) ** 2
+                    + self.streamVelocityZ(self.rocket.motor.burnOutTime) ** 2
+                )
+                ** 0.5
+            )
+        )
+        print(
+            "Mach Number at burnOut: {:.3f}".format(
+                self.MachNumber(self.rocket.motor.burnOutTime)
+            )
+        )
+        print(
+            "Kinetic energy at burnOut: {:.3e} J".format(
+                self.kineticEnergy(self.rocket.motor.burnOutTime)
+            )
+        )
+
+
+        # Print surface wind conditions
+        print("\nSurface Wind Conditions----------------")
+        print("Frontal Surface Wind Speed: {:.2f} m/s".format(self.frontalSurfaceWind))
+        print("Lateral Surface Wind Speed: {:.2f} m/s".format(self.lateralSurfaceWind))
+
+        # Print out of rail conditions
+        print("\nRail Departure State----------------")
+        print("Rail Departure Time: {:.3f} s".format(self.outOfRailTime))
+        print("Rail Departure Velocity: {:.3f} m/s".format(self.outOfRailVelocity))
+        print(
+            "Rail Departure Static Margin: {:.3f} c".format(
+                self.staticMargin(self.outOfRailTime)
+            )
+        )
+        print(
+            "Rail Departure Angle of Attack: {:.3f}°".format(
+                self.angleOfAttack(self.outOfRailTime)
+            )
+        )
+        print(
+            "Rail Departure Thrust-Weight Ratio: {:.3f}".format(
+                self.rocket.thrustToWeight(self.outOfRailTime)
+            )
+        )
+        print(
+            "Rail Departure Reynolds Number: {:.3e}".format(
+                self.ReynoldsNumber(self.outOfRailTime)
+            )
+        )
+
+
+
 
         return None
 
@@ -2459,15 +2469,45 @@ class Flight:
         ------
         None
         """
-        tosliii=np.array(self.finplots)
+        tosliii_unsorted=np.array(self.finplots)
+        tosliii = tosliii_unsorted[np.argsort(tosliii_unsorted[:, 0])]
+
         # Post-process results
         if self.postProcessed is False:
             self.postProcess()
 
         # Velocity and acceleration plots
+        fig1 = plt.figure(figsize=(9, 5))
+        fig1.patch.set_facecolor((1,1,1))
+
+        ax6 = plt.subplot(111)
+        ax6.plot(self.z[:, 0], self.z[:, 1] - self.env.elevation, label="Current Z Height")
+        ax6.plot(
+            tosliii[:,0], tosliii[:, 9],
+            label="Predicted Apogee (acc)",
+        )
+        ax6.plot(
+            tosliii[:,0], tosliii[:, 8],
+            label="Apogee Error",
+        )
+        ax6.plot(
+            tosliii[:,0], tosliii[:, 10],
+            label="Predicted Apogee (Vt)",
+        )
+        ax6.set_xlim(0, self.tFinal)
+        ax6.legend()
+        ax6.grid(True)
+        ax6.set_xlabel("Time (s)")
+        ax6.set_ylabel("Height (m)")
+        plt.show()
+
+
+
+        # Velocity and acceleration plots
         fig2 = plt.figure(figsize=(9, 16))
-        
-        ax1 = plt.subplot(611)
+        fig2.patch.set_facecolor((1,1,1))
+
+        ax1 = plt.subplot(511)
         ax1.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax1.set_xlim(0, self.tFinal)
         ax1.set_title("Fin Angle | Fin Z Force")
@@ -2481,10 +2521,10 @@ class Flight:
         ax1up.set_ylabel("Fin Z Force (N)", color="#1f77b4")
         ax1up.tick_params("y", colors="#1f77b4")
 
-        ax2 = plt.subplot(612)
+        ax2 = plt.subplot(512)
         ax2.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax2.set_xlim(0, self.tFinal)
-        ax2.set_title("Fin Angle | Z Acceleration (")
+        ax2.set_title("Fin Angle | Z Acceleration")
         ax2.set_xlabel("Time (s)")
         ax2.set_ylabel("Fin Angle (deg)", color="#ff7f0e")
         ax2.tick_params("y", colors="#ff7f0e")
@@ -2495,7 +2535,7 @@ class Flight:
         ax2up.set_ylabel("Acceleration Z (m/s²)", color="#1f77b4")
         ax2up.tick_params("y", colors="#1f77b4")
 
-        ax3 = plt.subplot(613)
+        ax3 = plt.subplot(513)
         ax3.plot(tosliii[:,0], tosliii[:, 1]*180/math.pi, color="#ff7f0e")
         ax3.set_xlim(0, self.tFinal)
         ax3.set_title("Fin Angle | Velocity Z")
@@ -2509,7 +2549,7 @@ class Flight:
         ax3up.set_ylabel("Velocity Z (m/s)", color="#1f77b4")
         ax3up.tick_params("y", colors="#1f77b4")
                
-        ax4 = plt.subplot(614)
+        ax4 = plt.subplot(514)
         ax4.plot(tosliii[:,0], tosliii[:, 2], label="Fin X Force")
         ax4.plot(
             tosliii[:,0], tosliii[:, 3],
@@ -2523,14 +2563,14 @@ class Flight:
         ax4.set_title("Secondary Fin Drag Forces")
 
 
-        ax5 = plt.subplot(615)
-        ax5.plot(tosliii[:,0], tosliii[:, 4], label="Fin X Mom")
+        ax5 = plt.subplot(515)
+        ax5.plot(tosliii[:,0], tosliii[:, 5], label="Fin X Mom")
         ax5.plot(
-            tosliii[:,0], tosliii[:, 5],
+            tosliii[:,0], tosliii[:, 6],
             label="Fin Y Mom",
         )
         ax5.plot(
-            tosliii[:,0], tosliii[:, 6],
+            tosliii[:,0], tosliii[:, 7],
             label="Fin Z Mom",
         )
         ax5.set_xlim(0, self.tFinal)
@@ -2540,18 +2580,6 @@ class Flight:
         ax5.set_ylabel("Moments (Nm)")
         ax5.set_title("Moments")
 
-        ax6 = plt.subplot(616)
-        ax6.plot(tosliii[:,0], tosliii[:,7], color="#ff7f0e")
-        ax6.set_xlim(0, self.tFinal)
-        ax6.set_xlabel("Time (s)")
-        ax6.set_ylabel("Error (m)", color="#ff7f0e")
-        ax6.tick_params("y", colors="#ff7f0e")
-        ax6.grid(True)
-
-        ax6up = ax6.twinx()
-        ax6up.plot(tosliii[:,0], tosliii[:,8], color="#1f77b4")
-        ax6up.set_ylabel("Apogee (m)", color="#1f77b4")
-        ax6up.tick_params("y", colors="#1f77b4")
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
@@ -3479,26 +3507,18 @@ class Flight:
         if self.postProcessed is False:
             self.postProcess()
 
-        # Print initial conditions
-        print("Initial Conditions\n")
-        self.printInitialConditionsData()
-
-        # Print launch rail orientation
-        print("\n\nLaunch Rail Orientation\n")
-        print("Launch Rail Inclination: {:.2f}°".format(self.inclination))
-        print("Launch Rail Heading: {:.2f}°\n\n".format(self.heading))
-
         # Print a summary of data about the flight
         self.info()
-
-        print("\n\nNumerical Integration Information\n")
-        self.printNumericalIntegrationSettings()
 
         print("\n\nTrajectory 3d Plot\n")
         self.plot3dTrajectory()
         
         print("\n\nFin Data\n")
         self.plotFinData()
+
+        # Print initial conditions
+        print("Initial Conditions----------------")
+        self.printInitialConditionsData()
         
         print("\n\nTrajectory Force Plots\n")
         self.plotTrajectoryForceData()
@@ -3515,15 +3535,23 @@ class Flight:
         print("\n\nTrajectory Angular Velocity and Acceleration Plots\n")
         self.plotAngularKinematicsData()
 
-
-        print("\n\nTrajectory Energy Plots\n")
-        self.plotEnergyData()
-
         print("\n\nTrajectory Fluid Mechanics Plots\n")
         self.plotFluidMechanicsData()
 
         print("\n\nTrajectory Stability and Control Plots\n")
         self.plotStabilityAndControlData()
+
+        print("\n\nTrajectory Energy Plots\n")
+        self.plotEnergyData()
+
+
+        # Print launch rail orientation
+        print("\nLaunch Rail Orientation----------------")
+        print("Launch Rail Inclination: {:.2f}°".format(self.inclination))
+        print("Launch Rail Heading: {:.2f}°".format(self.heading))
+
+        print("\nNumerical Integration Information----------------")
+        self.printNumericalIntegrationSettings()
 
         return None
 

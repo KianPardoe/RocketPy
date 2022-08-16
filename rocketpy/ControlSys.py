@@ -100,7 +100,19 @@ class ControlSys:
         # print('Acceleration: ' +  str(a))
         # print('Apogee: ' +  str(apogee))
         # print('-------------------')
-        print(round(t,2),round(a,2),round( v ,2),round(self.elevation,2),round(apogee,2),round( p- self.elevation,2))
+        # print(round(t,2),round(a,2),round( v ,2),round(self.elevation,2),round(apogee,2),round( p- self.elevation,2))
+        return apogee
+
+    def predictApogee2(self,t,u,vt):
+
+        # Input parsing
+        p = u[2]
+        Ac= p - self.elevation
+        v = u[5]
+        g = -9.81
+        # Calculate apogee
+        apogee = Ac+(vt*vt*math.log((vt*vt+v*v)/(vt*vt))/(2*g))
+  
         return apogee
         
 
@@ -125,13 +137,14 @@ class ControlSys:
         '''
         
         # Controller parameters
-        proportial_gain = 0.01
+        proportial_gain = .001
         integral_gain = 0
         derivative_gain = 0
         # Term calculation
-        alpha = 1
+        alpha = 0
         self.pred = alpha*self.predictApogee(t,u,z_accel) + (1-alpha)*self.pred
         error = self.pred - self.setpoint
+        #print(round(t,2),round(error,5))
         error_integral = self.cuma_error + error
         rate_error = error - self.hold_error
         #print(self.pred )
@@ -147,6 +160,8 @@ class ControlSys:
         #print(-integral_gain*error_integral)
         #print(-derivative_gain*rate_error)
         #print(error)
+
+
         # Limit Control
         if(out>math.pi/2.0):
             out = math.pi/2.0
@@ -154,12 +169,9 @@ class ControlSys:
             out = 0
         #print(out)
         
-        '''if t>1.7:
-            out=math.pi/2.0
-        else:
+        if t<1.8:
             out=0
-        '''
-        out=0
+
         return [-out,out,out,-out]
 
     def getAnglesLQR(self, position , velocity, orientation, angular_velocity):
