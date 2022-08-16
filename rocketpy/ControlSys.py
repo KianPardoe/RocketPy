@@ -20,18 +20,20 @@ class ControlSys:
     aligned in the direction of the positive x axis of the rocket frame. Expressed in rocket frame
     """
     def __init__(self,elevation):
-        self.setpoint = 100 # above ground level
-        self.hold_error = 0
-        self.cuma_error = 0
+        self.setpoint = 100.0 # above ground level
+        self.hold_error = 0.0
+        self.cuma_error = 0.0
         self.finAngles = [0, 0, 0, 0]
+        self.lastout = 0.0
         self.A =  0.000638 # Fin reference area for Cd Cl
         self.elevation = elevation
+        self.countForSampleRate = 0
                     
         self.r = np.array([25/1000, 0, 3/1000])
-
-        self.cut = 0
-        self.apog = 0
-        self.pred = 3000
+        self.finSpeedLimit = 0.01
+        self.cut = 0.0
+        self.apog = 0.0
+        self.pred = 150.0
 
         # Read in Cd and Cl data
         CdFile = open("data/proxima/proximaFinCD.csv", "r")
@@ -66,8 +68,8 @@ class ControlSys:
             
             # Drag and Lift Forces
             Fz = (compStreamVzB/abs(compStreamVzB)) * 0.5 * Cd * self.A * rho * (compStreamVzB ** 2)
-            Fx = 0
-            Fy = 0
+            Fx = 0.0
+            Fy = 0.0
             # Assuming Lift force is only generated for flow perpendicular to the axis of rotation of fin.
             # This means only finAngle[0], finAngle[2] (those aligned with x axis) generate lift for stream velocity in y direction
             if i % 2:
@@ -93,7 +95,7 @@ class ControlSys:
         g = -9.81
         a = z_accel
         # Calculate apogee
-        apogee = (v*v*math.log(abs(a/g)))/(2*abs(a+g)) + p - self.elevation
+        apogee = (v*v*math.log(abs(a/g)))/(2.0*abs(a+g)) + p - self.elevation
   
         # print('-------------------')
         # print('Velocity: ' + str(v))
@@ -111,10 +113,15 @@ class ControlSys:
         v = u[5]
         g = -9.81
         # Calculate apogee
-        apogee = Ac+(vt*vt*math.log((vt*vt+v*v)/(vt*vt))/(2*g))
+        apogee = Ac+(vt*vt*math.log((vt*vt+v*v)/(vt*vt))/(2.0*g))
   
         return apogee
+    
+    def finAngleWithSpeedLim(self,finAngle):
         
+        if(abs(self.lastout-finAngle)>self.finSpeedLimit):
+            finAngle = self.lastout + (finAngle-self.lastout)*self.finSpeedLimit/(abs(finAngle-self.lastout))  
+        return finAngle
 
     def getAnglesSISOfromPID(self, t,u,z_accel):
         # Calculates fin angles using PID controller for SISO
@@ -137,17 +144,25 @@ class ControlSys:
         '''
         
         # Controller parameters
-        proportial_gain = .001
-        integral_gain = 0
-        derivative_gain = 0
+        proportial_gain = 0.12
+        integral_gain = 0.00000001
+        derivative_gain = 0.04
+        
+        # Filter
+        alpha = 0.1 # 1.0 OFF
+        self.pred = alpha*self.predictApogee2(t,u,z_accel) + (1-alpha)*self.pred
+
+        # Sensor Frequency Limit
+        #if(self.countForSampleRate > 1):
+        #    self.countForSampleRate = 0
+        #    self.pred = alpha*self.predictApogee2(t,u,z_accel) + (1-alpha)*self.pred
+        #self.countForSampleRate = self.countForSampleRate + 1
+
         # Term calculation
-        alpha = 0
-        self.pred = alpha*self.predictApogee(t,u,z_accel) + (1-alpha)*self.pred
         error = self.pred - self.setpoint
-        #print(round(t,2),round(error,5))
         error_integral = self.cuma_error + error
         rate_error = error - self.hold_error
-        #print(self.pred )
+
         # Update Error Terms for store
         self.cuma_error = error_integral
         self.hold_error = error
@@ -161,16 +176,16 @@ class ControlSys:
         #print(-derivative_gain*rate_error)
         #print(error)
 
-
         # Limit Control
         if(out>math.pi/2.0):
             out = math.pi/2.0
         elif(out<0):
-            out = 0
-        #print(out)
-        
+            out = 0.0
+
+        out = self.finAngleWithSpeedLim(out)
         if t<1.8:
-            out=0
+            out=0.0
+        self.lastout = out
 
         return [-out,out,out,-out]
 
