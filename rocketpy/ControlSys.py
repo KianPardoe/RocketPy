@@ -150,7 +150,7 @@ class ControlSys:
         
         # Filter
         alpha = 0.1 # 1.0 OFF
-        self.pred = alpha*self.predictApogee2(t,u,z_accel) + (1-alpha)*self.pred
+        self.pred = alpha*self.predictApogee(t,u,z_accel) + (1-alpha)*self.pred
 
         # Sensor Frequency Limit
         #if(self.countForSampleRate > 1):
