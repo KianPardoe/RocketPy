@@ -530,6 +530,7 @@ class Flight:
         timeOvershoot=True,
         verbose=False,
         visualiseRocket=False,
+        
 
     ):
         """Run a trajectory simulation.
@@ -1396,10 +1397,6 @@ class Flight:
         M1 += forceAndMoments[3]
         M2 += forceAndMoments[4]
         M3 += forceAndMoments[5]
-        
-        self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],
-                            forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4],
-                            forceAndMoments[5],float(errorHeight),predHeight,predHeight2])
 
         # If visualiseRocket==True then save frame for visualisation
         if self.visualiseRocket:
@@ -1482,6 +1479,9 @@ class Flight:
             self.dynamicViscosity.append([t, self.env.dynamicViscosity(z)])
             self.pressure.append([t, self.env.pressure(z)])
             self.speedOfSound.append([t, self.env.speedOfSound(z)])
+            self.finplots.append([t,finAngles[1],forceAndMoments[0],forceAndMoments[1],
+                            forceAndMoments[2],forceAndMoments[3] ,forceAndMoments[4],
+                            forceAndMoments[5],float(errorHeight),predHeight,predHeight2])
 
         return uDot
         
@@ -1558,6 +1558,7 @@ class Flight:
             self.dynamicViscosity.append([t, self.env.dynamicViscosity(z)])
             self.pressure.append([t, self.env.pressure(z)])
             self.speedOfSound.append([t, self.env.speedOfSound(z)])
+            
 
         return [vx, vy, vz, ax, ay, az, 0, 0, 0, 0, 0, 0, 0]
 
@@ -2469,6 +2470,9 @@ class Flight:
         ------
         None
         """
+        if self.postProcessed is False:
+            self.postProcess()
+
         tosliii_unsorted=np.array(self.finplots)
         tosliii = tosliii_unsorted[np.argsort(tosliii_unsorted[:, 0])]
 
