@@ -25,6 +25,7 @@ Servo my_servo2;
 Servo my_servo3;
 Servo my_servo4;
 
+// ROCKET DYNAMICS
 double rocketPos[] = {0,0,0};
 double rocketVel[] = {0,0,0};
 double rocketAcc[] = {0,0,0};
@@ -33,8 +34,10 @@ double rocketAngPos[] = {0,0,0};
 double rocketAngVel[] = {0,0,0};
 double rocketAngAcc[] = {0,0,0};
 
-double dragCo = 0.5;
+// CONTROLLER DYNAMICS
+double finsAngles[] = {0,0,0,0} 
 
+// SUPERVISOR
 double setApogee = 3000;
 double predApogee = setApogee;
 double lastPredApogee = setApogee;
@@ -140,14 +143,15 @@ void updateApogeeErrors(){
   
   apogeeError = predApogee - setApogee;
   cumaApogeeError = cumaApogeeError + apogeeError;
-  changeApogeeError = (predApogee-lastPredApogee+changeApogeeError)/2; //Filter Maybe?s  
+  changeApogeeError = (predApogee-lastPredApogee+changeApogeeError)/2; //Filter Maybe?
   
 }
 
 void updateFinAngles(int cont){
 
     if(cont==1){
-      
+      out = PRO*apogeeError + INT*cumaApogeeError + DER*changeApogeeError
+      finsAngles = [-out,out,out,-out]
     }
     
     //if(cont==2){

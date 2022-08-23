@@ -1382,12 +1382,9 @@ class Flight:
         ################################################################################### '''
         # Get forces imparted by Control Surfaces
         finAngles = self.rocket.controlSys.getAnglesSISOfromPID(t,u,self.z_accel)
-              
         predHeight = self.rocket.controlSys.predictApogee(t,u,self.z_accel)
-
         vt=math.sqrt((2*M*self.env.g/(rho*self.rocket.area * (dragCoeff))))
         predHeight2 = self.rocket.controlSys.predictApogee2(t,u,vt)
-
         errorHeight = self.rocket.controlSys.getError(t,u,self.z_accel)
 
         forceAndMoments = self.rocket.controlSys.getForceMoment(t, u, finAngles, rho, compStreamVxB, compStreamVyB, compStreamVzB)
@@ -1402,7 +1399,6 @@ class Flight:
         if self.visualiseRocket:
             self.rocketVis.makeRocketVisFrame(t, K)
         
-            
         ''' ###################################################################################
         ################################################################################### '''
         
