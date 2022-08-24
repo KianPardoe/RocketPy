@@ -1,5 +1,9 @@
 #include <Servo.h>
 #include <math.h>
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
 
 #define SERVO1 6
 #define SERVO2 11
@@ -25,24 +29,36 @@ Servo my_servo2;
 Servo my_servo3;
 Servo my_servo4;
 
-double rocketPos[] = {0,0,0};
-double rocketVel[] = {0,0,0};
-double rocketAcc[] = {0,0,0};
+float rocketPos[] = {0,0,0};
+float rocketVel[] = {0,0,0};
+float rocketAcc[] = {0,0,0};
 
-double rocketAngPos[] = {0,0,0};
-double rocketAngVel[] = {0,0,0};
-double rocketAngAcc[] = {0,0,0};
+float rocketAngPos[] = {0,0,0};
+float rocketAngVel[] = {0,0,0};
+float rocketAngAcc[] = {0,0,0};
 
-double dragCo = 0.5;
+float dragCo = 0.5;
 
-double setApogee = 3000;
-double predApogee = setApogee;
-double lastPredApogee = setApogee;
+float setApogee = 3000;
+float predApogee = setApogee;
+float lastPredApogee = setApogee;
 
-double apogeeError = 0;
-double cumaApogeeError = 0;
-double changeApogeeError = 0;
+float apogeeError = 0;
+float cumaApogeeError = 0;
+float changeApogeeError = 0;
 
+/****************************************************/
+// Sensor Declerations
+
+// BNO055
+// Check I2C device address and correct line below (by default address is 0x29 or 0x28)
+// id, address. Not sure 
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
+// BMP390
+float groundLevelPressure = 1013.25  // (hPa) Gets changed on setup to current pressure val
+
+/****************************************************/
 void setup() {
 
   my_servo1.attach(SERVO1);
@@ -54,6 +70,20 @@ void setup() {
   my_servo2.write(0);
   my_servo3.write(0);
   my_servo4.write(0);
+
+  // BNO055
+  bno.setExtCrystalUse(true);
+
+  // BMP390
+  // Set up oversampling and filter initialization
+  bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
+  bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
+  bmp.setOutputDataRate(BMP3_ODR_50_HZ);
+  
+  // Read current pressure and set as ground level
+  groundLevelPressureHPA = bmp.readPressure()/100.0F;
+  
   
 }
 
@@ -110,7 +140,7 @@ void loop() {
 void getAltitude(){
   
   // C: get altitude from barometers
-  double alt = 20;
+  rocketPos[2] = bmp.readAltitude(groundLevelPressureHPA)
   
 }
 
