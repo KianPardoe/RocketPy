@@ -1,5 +1,10 @@
 #include <Servo.h>
 #include <math.h>
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
+#include "Adafruit_BMP3XX.h"
 
 // C: change motor to clockwise/anticlockwise
 #define SERVO1 6
@@ -57,7 +62,8 @@ float changeApogeeError = 0;
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 // BMP390
-float groundLevelPressure = 1013.25  // (hPa) Gets changed on setup to current pressure val
+Adafruit_BMP3XX bmp;
+float groundLevelPressurehPa = 1013.25;  // (hPa) Gets changed on setup to current pressure val
 
 /****************************************************/
 
@@ -84,7 +90,7 @@ void setup() {
   bmp.setOutputDataRate(BMP3_ODR_50_HZ);
   
   // Read current pressure and set as ground level
-  groundLevelPressureHPA = bmp.readPressure()/100.0F;
+  groundLevelPressurehPa = bmp.readPressure()/100.0F;
   
 }
 
@@ -102,14 +108,32 @@ void loop() {
 void getAltitude(){
   
   // C: get altitude from barometers
-  rocketPos[2] = bmp.readAltitude(groundLevelPressureHPA)
+  rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
   
 }
 
 void getIMU(){
-
-  // C: get IMU data, get acceleration or whatever
   
+  // C: get IMU data, get acceleration or whatever
+  /* Get a new sensor event */
+  sensors_event_t event;
+  // Get Orientation
+  bno.getEvent(&event);
+  rocketAngPos[0] = event.orientation.x;
+  rocketAngPos[1] = event.orientation.y;
+  rocketAngPos[2] = event.orientation.z;
+  
+  // Get Linear Acceleration
+  bno.getEvent(&event, Adafruit_BNO055::VECTOR_LINEARACCEL);
+  rocketAcc[0] = event.acceleration.x;
+  rocketAcc[1] = event.acceleration.y;
+  rocketAcc[2] = event.acceleration.z;
+
+  // Get Angular Velocity
+  bno.getEvent(&event, Adafruit_BNO055::VECTOR_GYROSCOPE);
+  rocketAngVel[0] = event.gyro.x;
+  rocketAngVel[1] = event.gyro.y;
+  rocketAngVel[2] = event.gyro.z;
 }
 
 void updateApogee(int pred){
