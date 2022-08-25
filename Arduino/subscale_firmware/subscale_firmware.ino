@@ -124,11 +124,22 @@ void setup() {
   bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
   bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
   bmp.setOutputDataRate(BMP3_ODR_50_HZ);
-  
-  // Read current pressure and set as ground level
-  groundLevelPressurehPa = bmp.readPressure()/100.0F;
 
-  // Sensor Calibration
+
+  // Sensor Calibration BMP390
+  // Average 10 readings over 5 seconds to set as ground level
+  /* Take 100 readings to get through initial eronious readings*/
+  for(int i=0; i<100; i++){
+  bmp.readPressure();
+  }
+  float pressureSum = 0;
+  for(int i=0; i<10; i++){
+    pressureSum += bmp.readPressure()/100.0F;
+    delay(100);
+  }
+  groundLevelPressurehPa = pressureSum/10.0;
+
+  // Sensor Calibration BNO055
   // Wait for Calibration and Confirm with 1 second Buzz
   /* 3 means 'fully calibrated" */
   uint8_t system, gyro, accel, mag;
