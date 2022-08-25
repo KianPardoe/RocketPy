@@ -58,7 +58,7 @@ float changeApogeeError = 0;
 
 // BNO055
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
-// id, address. Not sure 
+// id, address.
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 // BMP390
@@ -68,21 +68,51 @@ float groundLevelPressurehPa = 1013.25;  // (hPa) Gets changed on setup to curre
 /****************************************************/
 
 void setup() {
-
+  /****************************************************/
+  // Debug Code
+  Serial.begin(115200);
+  Serial.println("Orientation Sensor Test"); Serial.println("");
+  
+  /****************************************************/
   my_servo1.attach(SERVO1);
   my_servo2.attach(SERVO2);
   my_servo3.attach(SERVO3);
   my_servo4.attach(SERVO4);
-
+  
   my_servo1.write(0);
   my_servo2.write(0);
   my_servo3.write(0);
   my_servo4.write(0);
 
+  // Use built in LED for indicating error
+  pinMode(LED_BUILTIN, OUTPUT);
+  bool Error_LED = false;
+
+  /****************************************************/
+  // Sensor Setup
   // BNO055
+  /* Initialise the sensor */
+  if(!bno.begin()){
+    /* There was a problem detecting the BNO055 ... check your connections */
+    while(1){
+      digitalWrite(LED_BUILTIN, Error_LED);
+      Error_LED = !Error_LED;
+      delay(500);
+    }
+  }
+  
   bno.setExtCrystalUse(true);
 
   // BMP390
+  /* Initialise the sensor */
+  if (!bmp.begin_I2C()) {   // hardware I2C mode, can pass in address & alt Wire
+    while(1){
+      digitalWrite(LED_BUILTIN, Error_LED);
+      Error_LED = !Error_LED;
+      delay(500);
+    }
+  }
+  
   // Set up oversampling and filter initialization
   bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
   bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
@@ -90,19 +120,35 @@ void setup() {
   bmp.setOutputDataRate(BMP3_ODR_50_HZ);
   
   // Read current pressure and set as ground level
+  bmp.readPressure()/100.0F;
   groundLevelPressurehPa = bmp.readPressure()/100.0F;
-  
+  /****************************************************/
 }
 
 void loop() {
-
   getAltitude();
   getIMU();
   updateApogee(1);
   updateApogeeErrors();
   updateFinAngles(1);
   writeFinAngles();
+
+  /****************************************************/
+  // Debug Code
+  Serial.print("Altitude: ");
+  Serial.print(rocketPos[2], 4); Serial.println(" (m)");
   
+  Serial.print("Orientation: ");
+  Serial.print("X: ");
+  Serial.print(rocketAngPos[0], 4);
+  Serial.print("\tY: ");
+  Serial.print(rocketAngPos[1], 4);
+  Serial.print("\tZ: ");
+  Serial.print(rocketAngPos[2], 4);
+  Serial.println("");
+
+  delay(1000);
+  /****************************************************/
 }
 
 void getAltitude(){
