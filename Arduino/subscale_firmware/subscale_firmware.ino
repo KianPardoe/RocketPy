@@ -12,6 +12,8 @@
 #define SERVO3 10
 #define SERVO4 9
 
+#define BUZZ_PIN 3
+
 #define G 9.81
 
 #define PRO 1.0 
@@ -19,6 +21,7 @@
 #define DER 0.0
 
 #define SWEEP_SIZE 1
+#define DEG2RAD PI/180.0
 
 void getAltitude();
 void getIMU();
@@ -88,6 +91,9 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   bool Error_LED = false;
 
+  // Use Buzzer to indicate calibration complete
+  pinMode(BUZZ_PIN, OUTPUT);
+
   /****************************************************/
   // Sensor Setup
   // BNO055
@@ -120,8 +126,25 @@ void setup() {
   bmp.setOutputDataRate(BMP3_ODR_50_HZ);
   
   // Read current pressure and set as ground level
-  bmp.readPressure()/100.0F;
   groundLevelPressurehPa = bmp.readPressure()/100.0F;
+
+  // Sensor Calibration
+  // Wait for Calibration and Confirm with 1 second Buzz
+  /* 3 means 'fully calibrated" */
+  uint8_t system, gyro, accel, mag;
+  system = gyro = accel = mag = 0;
+  bno.getCalibration(&system, &gyro, &accel, &mag);
+  while(1){
+    if(system < 1 || gyro < 1 || accel < 1 || mag < 1){
+      delay(500);
+      bno.getCalibration(&system, &gyro, &accel, &mag);
+    }else{
+      digitalWrite(BUZZ_PIN, HIGH);
+      delay(1000);
+      digitalWrite(BUZZ_PIN, LOW);
+      break;
+    }
+  }
   /****************************************************/
 }
 
@@ -165,21 +188,21 @@ void getIMU(){
   sensors_event_t event;
   // Get Orientation
   bno.getEvent(&event);
-  rocketAngPos[0] = event.orientation.x;
-  rocketAngPos[1] = event.orientation.y;
-  rocketAngPos[2] = event.orientation.z;
+  rocketAngPos[0] = event.orientation.x * DEG2RAD;
+  rocketAngPos[1] = event.orientation.y * DEG2RAD;
+  rocketAngPos[2] = event.orientation.z * DEG2RAD;
   
-  // Get Linear Acceleration
+  // Get Linear Acceleration (m/s^2)
   bno.getEvent(&event, Adafruit_BNO055::VECTOR_LINEARACCEL);
   rocketAcc[0] = event.acceleration.x;
   rocketAcc[1] = event.acceleration.y;
   rocketAcc[2] = event.acceleration.z;
 
-  // Get Angular Velocity
+  // Get Angular Velocity (deg/s)
   bno.getEvent(&event, Adafruit_BNO055::VECTOR_GYROSCOPE);
-  rocketAngVel[0] = event.gyro.x;
-  rocketAngVel[1] = event.gyro.y;
-  rocketAngVel[2] = event.gyro.z;
+  rocketAngVel[0] = event.gyro.x * DEG2RAD;
+  rocketAngVel[1] = event.gyro.y * DEG2RAD;
+  rocketAngVel[2] = event.gyro.z * DEG2RAD;
 }
 
 void updateApogee(int pred){
