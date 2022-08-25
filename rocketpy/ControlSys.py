@@ -177,8 +177,8 @@ class ControlSys:
         #print(error)
 
         # Limit Control
-        if(out>math.pi/2.0):
-            out = math.pi/2.0
+        if(out>math.pi/4.0):
+            out = math.pi/4.0
         elif(out<0):
             out = 0.0
 

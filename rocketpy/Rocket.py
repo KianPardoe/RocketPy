@@ -14,7 +14,6 @@ from inspect import signature, getsourcelines
 from collections import namedtuple
 
 import numpy as np
-from rocketpy.ControlSurf import ControlSurf
 from rocketpy.ControlSys import ControlSys
 from scipy import integrate
 from scipy import linalg
