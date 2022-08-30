@@ -2245,7 +2245,6 @@ class Flight:
             )
         )
 
-
         # Print surface wind conditions
         print("\nSurface Wind Conditions----------------")
         print("Frontal Surface Wind Speed: {:.2f} m/s".format(self.frontalSurfaceWind))

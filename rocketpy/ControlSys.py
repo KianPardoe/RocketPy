@@ -20,7 +20,7 @@ class ControlSys:
     aligned in the direction of the positive x axis of the rocket frame. Expressed in rocket frame
     """
     def __init__(self,elevation):
-        self.setpoint = 100.0 # above ground level
+        self.setpoint = 100 # above ground level
         self.hold_error = 0.0
         self.cuma_error = 0.0
         self.finAngles = [0, 0, 0, 0]
@@ -92,8 +92,8 @@ class ControlSys:
         # Input parsing
         p = u[2]
         v = u[5]
-        g = -9.81
-        a = z_accel
+        g = 9.81
+        a = z_accel-g
         # Calculate apogee
         apogee = (v*v*math.log(abs(a/g)))/(2.0*abs(a+g)) + p - self.elevation
   
@@ -132,6 +132,11 @@ class ControlSys:
         position_z = u[2]
         velocity_z = u[5]
 
+        #out = math.pi/4.0
+        #if t<1.8:
+        #    out=0.0
+        #return [-out,out,out,-out]
+
         '''# Cut Logic
         if(position_z - 722> self.apog):
             self.apog = position_z - 722
@@ -142,14 +147,14 @@ class ControlSys:
         if(self.cut>3 or t < 5):
             return [0,0,0,0]    
         '''
-        
+         
         # Controller parameters
-        proportial_gain = 0.12
-        integral_gain = 0.00000001
-        derivative_gain = 0.04
+        proportial_gain = 0.5
+        integral_gain = 0.0
+        derivative_gain = 0.0
         
         # Filter
-        alpha = 0.1 # 1.0 OFF
+        alpha = 1 # 1.0 OFF
         self.pred = alpha*self.predictApogee(t,u,z_accel) + (1-alpha)*self.pred
 
         # Sensor Frequency Limit
