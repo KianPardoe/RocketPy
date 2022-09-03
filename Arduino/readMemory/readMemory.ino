@@ -7,6 +7,8 @@
 #include "Adafruit_BMP3XX.h"
 #include "QSPIFBlockDevice.h"
 #include "MBRBlockDevice.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 // C: change motor to clockwise/anticlockwise
 #define SERVO1 2
@@ -31,6 +33,7 @@
 void setupMemory();
 void clearMemory();
 void writeToMemory(String toWrite);
+void readMemory(String toRead);
 void writeBaro();
 void writeIMU();
 
@@ -175,6 +178,8 @@ void setup() {
   }
 
   setUpMemory();
+  readMemory();
+  blockDevice.deinit();
 
 }
 
@@ -216,6 +221,22 @@ void setupMemory(){
 
 }
 
+void readMemory(String toRead){
+
+    blockDevice.read(buffer, 0, blockDevice.get_read_size());
+    Serial.println(buffer);
+    FILE * fPtr;    
+    fPtr = fopen("log.txt", "w");
+    if(fPtr == NULL)
+    {
+        Serial.println("Unable to create file.\n");
+        exit(EXIT_FAILURE);
+    }
+    fputs(buffer, fPtr);
+    fclose(fPtr);
+    
+}
+
 void writeToMemory(String toWrite){
   
   const auto messageSize = toWrite.length() + 1;
@@ -251,96 +272,8 @@ void writeIMU(){
 
 }
 
-void getAltitude(){
-  
-  // C: get altitude from barometers
-  float hold = rocketPos[2];
-  rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
-  rocketVel[2] = rocketPos[2] - rocketPos[2];
-  // rocketVel[2] = ((rocketPos[2] - rocketPos[2])/2+rocketVel[2])/2; % filter version
-  writeBaro();
+void clearMemory(
 
-}
 
-void getAltitude(){
-  
-  // C: get altitude from barometers
-  rocketVel[2] = rocketPos[2]-
-  
-}
 
-void getIMU(){
-  
-  // C: get IMU data, get acceleration or whatever
-  /* Get a new sensor event */
-  sensors_event_t event;
-  // Get Orientation
-  bno.getEvent(&event);
-  rocketAngPos[0] = event.orientation.x * DEG2RAD;
-  rocketAngPos[1] = event.orientation.y * DEG2RAD;
-  rocketAngPos[2] = event.orientation.z * DEG2RAD;
-  
-  // Get Linear Acceleration (m/s^2)
-  bno.getEvent(&event, Adafruit_BNO055::VECTOR_LINEARACCEL);
-  rocketAcc[0] = event.acceleration.x;
-  rocketAcc[1] = event.acceleration.y;
-  rocketAcc[2] = event.acceleration.z;
-
-  // Get Angular Velocity (deg/s)
-  bno.getEvent(&event, Adafruit_BNO055::VECTOR_GYROSCOPE);
-  rocketAngVel[0] = event.gyro.x * DEG2RAD;
-  rocketAngVel[1] = event.gyro.y * DEG2RAD;
-  rocketAngVel[2] = event.gyro.z * DEG2RAD;
-
-  writeIMU();
-
-}
-
-void updateApogee(int pred){
-
-    double p = rocketPos[2];
-    double v = rocketVel[2];
-    double a = rocketAcc[2];
-    
-    if(pred==1){
-      predApogee = v*v*log(abs((a-G)/G))/(2*abs(a+G)) + p;
-    }
-    
-    if(pred==2){
-      // C: predictor 2 needs Cd values
-    }
-    
-}
-
-void updateApogeeErrors(){
-  
-  apogeeError = predApogee - setApogee;
-  cumaApogeeError = cumaApogeeError + apogeeError;
-  changeApogeeError = ((predApogee-lastPredApogee)/2+changeApogeeError)/2; //Filter Maybe?
-  
-}
-
-void updateFinAngles(int cont){
-
-  if(cont==1){
-    double out = PRO*apogeeError + INT*cumaApogeeError + DER*changeApogeeError;
-    finsAngles[0] = -out;
-    finsAngles[1] = out;
-    finsAngles[2] = out;
-    finsAngles[3] = -out;
-  }
-  
-  //if(cont==2){
-    // C: lqr 2
-  //}
- 
-}
-
-void writeFinAngles(){
-
-  my_servo1.write(finsAngles[0]);
-  my_servo2.write(finsAngles[1]);
-  my_servo3.write(finsAngles[2]);
-  my_servo4.write(finsAngles[3]);
-
-}
+){
