@@ -23,6 +23,9 @@
 #define SWEEP_SIZE 1
 #define DEG2RAD PI/180.0
 
+void setupMemory();
+void writeToMemory(String toWrite);
+
 void getAltitude();
 void getIMU();
 void updateApogee(int pred);
@@ -158,15 +161,9 @@ void setup() {
       break;
     }
   }
-  /****************************************************/
-  // Memory Setup
-  /****************************************************/
-  
-  // Create a block device on the available space of the flash
-  QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
-  MBRBlockDevice blockDevice(&root, 1);  
 
-  /****************************************************/
+  setUpMemory();
+
 }
 
 void loop() {
@@ -195,10 +192,55 @@ void loop() {
   /****************************************************/
 }
 
+void setupMemory(){
+
+  // Create a block device on the available space of the flash
+  QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+  MBRBlockDevice blockDevice(&root, 1);  
+
+  if(blockDevice.init() != 0 || blockDevice.size() != BLOCK_DEVICE_SIZE) {    
+    Serial.println("Partitioning block device...");
+    blockDevice.deinit();
+    // Allocate a FAT 32 partition
+    MBRBlockDevice::partition(&root, 1, PARTITION_TYPE, 0, BLOCK_DEVICE_SIZE);
+    blockDevice.init();
+  }
+
+  // Might have to send these to global
+  const auto eraseBlockSize = blockDevice.get_erase_size(); 
+  const auto programBlockSize = blockDevice.get_program_size();
+
+}
+
+void writeToMemory(String toWrite){
+  
+  const auto messageSize = toWrite.length() + 1; // C String takes 1 byte for NULL termination
+  const unsigned int requiredEraseBlocks = ceil(messageSize / (float)  eraseBlockSize);
+  const unsigned int requiredBlocks = ceil(messageSize / (float)  programBlockSize);
+  const auto dataSize = requiredBlocks * programBlockSize;  
+  char buffer[dataSize] {};  
+
+  // Read back what was stored at previous execution  
+  Serial.println("Reading previous message...");
+  blockDevice.read(buffer, 0, dataSize);
+  Serial.println(buffer);
+
+}
+
 void getAltitude(){
   
   // C: get altitude from barometers
+  float hold = rocketPos[2];
   rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
+  rocketVel[2] = rocketPos[2] - rocketPos[2];
+  // rocketVel[2] = ((rocketPos[2] - rocketPos[2])/2+rocketVel[2])/2; % filter version
+
+}
+
+void getAltitude(){
+  
+  // C: get altitude from barometers
+  rocketVel[2] = rocketPos[2]-
   
 }
 
@@ -224,6 +266,7 @@ void getIMU(){
   rocketAngVel[0] = event.gyro.x * DEG2RAD;
   rocketAngVel[1] = event.gyro.y * DEG2RAD;
   rocketAngVel[2] = event.gyro.z * DEG2RAD;
+
 }
 
 void updateApogee(int pred){
@@ -246,7 +289,7 @@ void updateApogeeErrors(){
   
   apogeeError = predApogee - setApogee;
   cumaApogeeError = cumaApogeeError + apogeeError;
-  changeApogeeError = (predApogee-lastPredApogee+changeApogeeError)/2; //Filter Maybe?
+  changeApogeeError = ((predApogee-lastPredApogee)/2+changeApogeeError)/2; //Filter Maybe?
   
 }
 

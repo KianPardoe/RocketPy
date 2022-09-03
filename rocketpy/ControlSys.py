@@ -25,12 +25,12 @@ class ControlSys:
         self.cuma_error = 0.0
         self.finAngles = [0, 0, 0, 0]
         self.lastout = 0.0
-        self.A =  0.000638 # Fin reference area for Cd Cl
+        self.A =  0.00105# Fin reference area for Cd Cl
         self.elevation = elevation
         self.countForSampleRate = 0
                     
         self.r = np.array([25/1000, 0, 3/1000])
-        self.finSpeedLimit = 0.01
+        self.finSpeedLimit = 0.05
         self.cut = 0.0
         self.apog = 0.0
         self.pred = 150.0
@@ -132,8 +132,8 @@ class ControlSys:
         position_z = u[2]
         velocity_z = u[5]
 
-        #out = math.pi/4.0
-        #if t<1.8:
+        #out = 0;#math.pi/4.0
+        ##if t<1.8:
         #    out=0.0
         #return [-out,out,out,-out]
 
@@ -149,7 +149,7 @@ class ControlSys:
         '''
          
         # Controller parameters
-        proportial_gain = 0.5
+        proportial_gain = 0.3
         integral_gain = 0.0
         derivative_gain = 0.0
         
