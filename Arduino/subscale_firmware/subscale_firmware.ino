@@ -7,12 +7,12 @@
 #include "Adafruit_BMP3XX.h"
 
 // C: change motor to clockwise/anticlockwise
-#define SERVO1 6
-#define SERVO2 11
-#define SERVO3 10
-#define SERVO4 9
+#define SERVO1 2
+#define SERVO2 3
+#define SERVO3 4
+#define SERVO4 5
 
-#define BUZZ_PIN 3
+#define BUZZ_PIN 6
 
 #define G 9.81
 
@@ -58,7 +58,7 @@ float changeApogeeError = 0;
 
 /****************************************************/
 // Sensor Declerations
-
+/****************************************************/
 // BNO055
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 // id, address.
@@ -77,6 +77,7 @@ void setup() {
   Serial.println("Orientation Sensor Test"); Serial.println("");
   
   /****************************************************/
+  // Servos
   my_servo1.attach(SERVO1);
   my_servo2.attach(SERVO2);
   my_servo3.attach(SERVO3);
@@ -96,6 +97,7 @@ void setup() {
 
   /****************************************************/
   // Sensor Setup
+  /****************************************************/
   // BNO055
   /* Initialise the sensor */
   if(!bno.begin()){
@@ -156,6 +158,14 @@ void setup() {
       break;
     }
   }
+  /****************************************************/
+  // Memory Setup
+  /****************************************************/
+  
+  // Create a block device on the available space of the flash
+  QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+  MBRBlockDevice blockDevice(&root, 1);  
+
   /****************************************************/
 }
 
