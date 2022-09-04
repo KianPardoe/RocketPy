@@ -95,8 +95,7 @@ void setup() {
   pinMode(BUZZ_PIN, OUTPUT);
 
   setUpMemory();
-  readMemory();
-  blockDevice.deinit();
+  
 
 }
 
@@ -104,19 +103,9 @@ void loop() {
 
   /****************************************************/
   // Debug Code
-  Serial.print("Altitude: ");
-  Serial.print(rocketPos[2], 4); Serial.println(" (m)");
-  
-  Serial.print("Orientation: ");
-  Serial.print("X: ");
-  Serial.print(rocketAngPos[0], 4);
-  Serial.print("\tY: ");
-  Serial.print(rocketAngPos[1], 4);
-  Serial.print("\tZ: ");
-  Serial.print(rocketAngPos[2], 4);
-  Serial.println("");
+  readMemory();
 
-  delay(1000);
+  delay(10000);
   /****************************************************/
 }
 
@@ -138,7 +127,7 @@ void readMemory(){
     char buffer[dataSize] {};
     blockDevice.read(buffer, 0, dataSize);
     Serial.println(buffer);
-    FILE * fPtr;    
+    /*FILE * fPtr;    
     fPtr = fopen("log.txt", "w");
     if(fPtr == NULL)
     {
@@ -147,7 +136,7 @@ void readMemory(){
     }
     fputs(buffer, fPtr);
     fclose(fPtr);
-    
+    */
 }
 
 void writeToMemory(String toWrite){
