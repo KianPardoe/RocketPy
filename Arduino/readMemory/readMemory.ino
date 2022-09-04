@@ -88,8 +88,7 @@ void setup() {
   my_servo4.write(0);
 
   // Use built in LED for indicating error
-  pinMode(LED_BUILTIN, OUTPUT);
-  bool Error_LED = false;
+  pinMode(LED_BUILTIN, OUTPUT); 
 
   // Use Buzzer to indicate calibration complete
   pinMode(BUZZ_PIN, OUTPUT);
@@ -123,10 +122,16 @@ void setUpMemory(){
 
 void readMemory(){
 
-    const auto dataSize = blockDevice.get_read_size();
-    char buffer[dataSize] {};
-    blockDevice.read(buffer, 0, dataSize);
-    Serial.println(buffer);
+    const auto readBlockSize = blockDevice.get_read_size();
+    char buffer[readBlockSize] {};
+    int cursor = 0;
+    while(blockDevice.is_valid_read(cursor, readBlockSize)){
+      
+      blockDevice.read(buffer, cursor, readBlockSize);
+      Serial.print(buffer);
+      cursor = cursor + 1;
+      
+    }
     /*FILE * fPtr;    
     fPtr = fopen("log.txt", "w");
     if(fPtr == NULL)

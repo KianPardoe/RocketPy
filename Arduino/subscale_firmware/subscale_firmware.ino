@@ -33,6 +33,7 @@ void clearMemory();
 void writeToMemory(String toWrite);
 void writeBaro();
 void writeIMU();
+void writePredict();
 
 void getAltitude();
 void getIMU();
@@ -117,6 +118,7 @@ void setup() {
   /****************************************************/
   // BNO055
   /* Initialise the sensor */
+  
   if(!bno.begin()){
     /* There was a problem detecting the BNO055 ... check your connections */
     while(1){
@@ -125,7 +127,7 @@ void setup() {
       delay(100);
     }
   } 
-  
+
   bno.setExtCrystalUse(true);
 
   // BMP390
@@ -201,7 +203,7 @@ void loop() {
   Serial.print(rocketAngPos[2], 4);
   Serial.println("");
 
-  delay(1000);
+  delay(33);
   /****************************************************/
 }
 
@@ -233,25 +235,32 @@ void writeToMemory(String toWrite){
 
 void writeBaro(){
 
-  String toWrite = "Altitude (Baro): " + String(rocketPos[2]);
-  toWrite = toWrite + "\nZ-Velocity (Baro): " + String(rocketVel[2]);
+  String toWrite = String(rocketPos[2]);
+  toWrite = toWrite + "," + String(rocketVel[2]);
   writeToMemory(toWrite);
 
 }
 void writeIMU(){
 
-  String toWrite = "X-Ang: " + String(rocketAngPos[0]);
-  toWrite = toWrite + "\nY-Ang: " + String(rocketAngPos[1]);
-  toWrite = toWrite + "\nZ-Ang: " + String(rocketAngPos[2]);
-  toWrite = toWrite + "\nY-Accel: " + String(rocketAcc[0]);
-  toWrite = toWrite + "\nY-Accel: " + String(rocketAcc[1]);
-  toWrite = toWrite + "\nZ-Accel: " + String(rocketAcc[2]);
-  toWrite = toWrite + "\nX-AngVel: " + String(rocketAngVel[0]);
-  toWrite = toWrite + "\nY-AngVel: " + String(rocketAngVel[1]);
-  toWrite = toWrite + "\nZ-AngVel: " + String(rocketAngVel[2]);
-
+  String toWrite =  "," + String(rocketAngPos[0]);
+  toWrite = toWrite + "," + String(rocketAngPos[1]);
+  toWrite = toWrite + "," + String(rocketAngPos[2]);
+  toWrite = toWrite + "," + String(rocketAcc[0]);
+  toWrite = toWrite + "," + String(rocketAcc[1]);
+  toWrite = toWrite + "," + String(rocketAcc[2]);
+  toWrite = toWrite + "," + String(rocketAngVel[0]);
+  toWrite = toWrite + "," + String(rocketAngVel[1]);
+  toWrite = toWrite + "," + String(rocketAngVel[2]);
+  
   writeToMemory(toWrite);
 
+}
+
+void writePredict(){
+
+  String toWrite =  "," + String(predApogee) + "\n";
+  writeToMemory(toWrite);
+  
 }
 
 void getAltitude(){
@@ -261,7 +270,7 @@ void getAltitude(){
   rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
   rocketVel[2] = rocketPos[2] - hold;
   // rocketVel[2] = ((rocketPos[2] - rocketPos[2])/2+rocketVel[2])/2; % filter version
- // writeBaro();
+  writeBaro();
 
 }
 
@@ -288,7 +297,7 @@ void getIMU(){
   rocketAngVel[1] = event.gyro.y * DEG2RAD;
   rocketAngVel[2] = event.gyro.z * DEG2RAD;
 
-  //writeIMU();
+  writeIMU();
 
 }
 
@@ -296,15 +305,17 @@ void updateApogee(int pred){
 
     double p = rocketPos[2];
     double v = rocketVel[2];
-    double a = rocketAcc[2];
+    double a = rocketAcc[2]-G;
     
     if(pred==1){
-      predApogee = v*v*log(abs((a-G)/G))/(2*abs(a+G)) + p;
+      predApogee = v*v*log(abs((a)/G))/(2*abs(a+G)) + p;
     }
     
     if(pred==2){
       // C: predictor 2 needs Cd values
     }
+
+    writePredict();
     
 }
 
