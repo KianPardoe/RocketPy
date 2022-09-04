@@ -5,8 +5,8 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 #include "Adafruit_BMP3XX.h"
-#include "QSPIFBlockDevice.h"
-#include "MBRBlockDevice.h"
+//#include "QSPIFBlockDevice.h"
+//#include "MBRBlockDevice.h"
 
 // C: change motor to clockwise/anticlockwise
 #define SERVO1 2
@@ -27,13 +27,13 @@
 
 #define SWEEP_SIZE 1
 #define DEG2RAD PI/180.0
-
+/*
 void setupMemory();
 void clearMemory();
 void writeToMemory(String toWrite);
 void writeBaro();
 void writeIMU();
-
+*/
 void getAltitude();
 void getIMU();
 void updateApogee(int pred);
@@ -66,12 +66,12 @@ float lastPredApogee = setApogee;
 float apogeeError = 0;
 float cumaApogeeError = 0;
 float changeApogeeError = 0;
-
+/*
 // Memory
 QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 MBRBlockDevice blockDevice(&root, 1); 
 int memoryCursor = 0;
-
+*/
 /****************************************************/
 // Sensor Declerations
 /****************************************************/
@@ -174,7 +174,7 @@ void setup() {
     }
   }
 
-  setUpMemory();
+ // setUpMemory();
 
 }
 
@@ -203,7 +203,7 @@ void loop() {
   delay(1000);
   /****************************************************/
 }
-
+/*
 void setupMemory(){ 
 
   if(blockDevice.init() != 0 || blockDevice.size() != BLOCK_DEVICE_SIZE) {    
@@ -250,24 +250,19 @@ void writeIMU(){
   writeToMemory(toWrite);
 
 }
-
+*/
 void getAltitude(){
   
   // C: get altitude from barometers
   float hold = rocketPos[2];
   rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
-  rocketVel[2] = rocketPos[2] - rocketPos[2];
+  rocketVel[2] = rocketPos[2] - hold;
   // rocketVel[2] = ((rocketPos[2] - rocketPos[2])/2+rocketVel[2])/2; % filter version
-  writeBaro();
+ // writeBaro();
 
 }
 
-void getAltitude(){
-  
-  // C: get altitude from barometers
-  rocketVel[2] = rocketPos[2]-
-  
-}
+
 
 void getIMU(){
   
@@ -292,7 +287,7 @@ void getIMU(){
   rocketAngVel[1] = event.gyro.y * DEG2RAD;
   rocketAngVel[2] = event.gyro.z * DEG2RAD;
 
-  writeIMU();
+  //writeIMU();
 
 }
 
