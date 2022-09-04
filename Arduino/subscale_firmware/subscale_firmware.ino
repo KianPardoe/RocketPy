@@ -5,8 +5,8 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 #include "Adafruit_BMP3XX.h"
-//#include "QSPIFBlockDevice.h"
-//#include "MBRBlockDevice.h"
+#include "QSPIFBlockDevice.h"
+#include "MBRBlockDevice.h"
 
 // C: change motor to clockwise/anticlockwise
 #define SERVO1 2
@@ -27,13 +27,13 @@
 
 #define SWEEP_SIZE 1
 #define DEG2RAD PI/180.0
-/*
-void setupMemory();
+
+void setUpMemory();
 void clearMemory();
 void writeToMemory(String toWrite);
 void writeBaro();
 void writeIMU();
-*/
+
 void getAltitude();
 void getIMU();
 void updateApogee(int pred);
@@ -66,12 +66,13 @@ float lastPredApogee = setApogee;
 float apogeeError = 0;
 float cumaApogeeError = 0;
 float changeApogeeError = 0;
-/*
+
 // Memory
+using namespace mbed;
 QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 MBRBlockDevice blockDevice(&root, 1); 
 int memoryCursor = 0;
-*/
+
 /****************************************************/
 // Sensor Declerations
 /****************************************************/
@@ -121,9 +122,9 @@ void setup() {
     while(1){
       digitalWrite(LED_BUILTIN, Error_LED);
       Error_LED = !Error_LED;
-      delay(500);
+      delay(100);
     }
-  }
+  } 
   
   bno.setExtCrystalUse(true);
 
@@ -174,7 +175,7 @@ void setup() {
     }
   }
 
- // setUpMemory();
+  setUpMemory();
 
 }
 
@@ -203,8 +204,8 @@ void loop() {
   delay(1000);
   /****************************************************/
 }
-/*
-void setupMemory(){ 
+
+void setUpMemory(){ 
 
   if(blockDevice.init() != 0 || blockDevice.size() != BLOCK_DEVICE_SIZE) {    
     Serial.println("Partitioning block device...");
@@ -217,7 +218,9 @@ void setupMemory(){
 }
 
 void writeToMemory(String toWrite){
-  
+
+  const auto eraseBlockSize = blockDevice.get_erase_size();
+  const auto programBlockSize = blockDevice.get_program_size();
   const auto messageSize = toWrite.length() + 1;
   const unsigned int requiredEraseBlocks = ceil(messageSize / (float)  eraseBlockSize);
   const unsigned int requiredBlocks = ceil(messageSize / (float)  programBlockSize);
@@ -230,27 +233,27 @@ void writeToMemory(String toWrite){
 
 void writeBaro(){
 
-  String toWrite = 'Altitude (Baro): ' + String(rocketPos[2])
-  toWrite = toWrite + '\nZ-Velocity (Baro): ' + String(rocketVel[2])
+  String toWrite = "Altitude (Baro): " + String(rocketPos[2]);
+  toWrite = toWrite + "\nZ-Velocity (Baro): " + String(rocketVel[2]);
   writeToMemory(toWrite);
 
 }
 void writeIMU(){
 
-  String toWrite = 'X-Ang: ' + String(rocketAngPos[0])
-  toWrite = toWrite + '\nY-Ang: ' + String(rocketAngPos[1])
-  toWrite = toWrite + '\nZ-Ang: ' + String(rocketAngPos[2])
-  toWrite = toWrite + '\nY-Accel: ' + String(rocketAcc[0])
-  toWrite = toWrite + '\nY-Accel: ' + String(rocketAcc[1])
-  toWrite = toWrite + '\nZ-Accel: ' + String(rocketAcc[2])
-  toWrite = toWrite + '\nX-AngVel: ' + String(rocketAngVel[0])
-  toWrite = toWrite + '\nY-AngVel: ' + String(rocketAngVel[1])
-  toWrite = toWrite + '\nZ-AngVel: ' + String(rocketAngVel[2])
+  String toWrite = "X-Ang: " + String(rocketAngPos[0]);
+  toWrite = toWrite + "\nY-Ang: " + String(rocketAngPos[1]);
+  toWrite = toWrite + "\nZ-Ang: " + String(rocketAngPos[2]);
+  toWrite = toWrite + "\nY-Accel: " + String(rocketAcc[0]);
+  toWrite = toWrite + "\nY-Accel: " + String(rocketAcc[1]);
+  toWrite = toWrite + "\nZ-Accel: " + String(rocketAcc[2]);
+  toWrite = toWrite + "\nX-AngVel: " + String(rocketAngVel[0]);
+  toWrite = toWrite + "\nY-AngVel: " + String(rocketAngVel[1]);
+  toWrite = toWrite + "\nZ-AngVel: " + String(rocketAngVel[2]);
 
   writeToMemory(toWrite);
 
 }
-*/
+
 void getAltitude(){
   
   // C: get altitude from barometers
@@ -261,8 +264,6 @@ void getAltitude(){
  // writeBaro();
 
 }
-
-
 
 void getIMU(){
   
