@@ -1,9 +1,9 @@
 #include <Servo.h>
 
-#define SERVO1 6
-#define SERVO2 11
-#define SERVO3 10
-#define SERVO4 9
+#define SERVO1 2
+#define SERVO2 3
+#define SERVO3 4
+#define SERVO4 5
 
 Servo my_servo1;
 Servo my_servo2;
@@ -14,9 +14,9 @@ void changeAngle();
 void writeFinAngles();
 
 // CONTROLLER DYNAMICS
-int finsAngles[] = {0,0,0,0};
+int finsAngles[] = {10,10,10,10};
 int currMotor = 0;
-char read;
+char read2;
 int inc;
 void setup() {
 
@@ -27,10 +27,10 @@ void setup() {
   my_servo3.attach(SERVO3);
   my_servo4.attach(SERVO4);
   
-  my_servo1.write(0);
-  my_servo2.write(0);
-  my_servo3.write(0);
-  my_servo4.write(0);
+  my_servo1.write(10);
+  my_servo2.write(10);
+  my_servo3.write(10);
+  my_servo4.write(10);
   
 }
 
@@ -38,8 +38,8 @@ void loop() {
 
   if (Serial.available() > 0) {
 
-    read = Serial.read();
-    switch(read){
+    read2 = Serial.read();
+    switch(read2){
       case 'd':
           currMotor = (currMotor + 1)%4;
           Serial.print("Selected Motor ");
@@ -73,7 +73,7 @@ void loop() {
     }
 
   }
-  
+  writeFinAngles();
   delay(10);
   
 }

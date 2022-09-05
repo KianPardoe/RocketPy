@@ -57,7 +57,7 @@ float rocketAngVel[] = {0,0,0};
 float rocketAngAcc[] = {0,0,0};
 
 // CONTROLLER DYNAMICS
-float finsAngles[] = {0,0,0,0};
+float finsAngles[] = {10,10,10,10};
 
 // SUPERVISOR
 float setApogee = 3000;
@@ -101,10 +101,10 @@ void setup() {
   my_servo3.attach(SERVO3);
   my_servo4.attach(SERVO4);
   
-  my_servo1.write(0);
-  my_servo2.write(0);
-  my_servo3.write(0);
-  my_servo4.write(0);
+  my_servo1.write(10);
+  my_servo2.write(10);
+  my_servo3.write(10);
+  my_servo4.write(10);
 
   // Use built in LED for indicating error
   pinMode(LED_BUILTIN, OUTPUT);
