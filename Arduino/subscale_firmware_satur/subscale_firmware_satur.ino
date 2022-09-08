@@ -1,6 +1,6 @@
 #include <Servo.h>
 #include <math.h>
-#include <Wire.h>
+#include "i2c_driver_wire.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>

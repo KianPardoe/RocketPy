@@ -1,20 +1,19 @@
 #include <Arduino.h>
 #include <Servo.h>
 #include <math.h>
-#include <Wire.h>
+#include "i2c_driver_wire.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-#include <utility/imumaths.h>
 #include <SD.h>
 #include "Adafruit_BMP3XX.h"
 
 // C: change motor to clockwise/anticlockwise
-#define SERVO1 2
-#define SERVO2 3
-#define SERVO3 4
-#define SERVO4 5
+#define SERVO1 11
+#define SERVO2 25
+#define SERVO3 28
+#define SERVO4 24
 
-#define BUZZ_PIN 6
+#define BUZZ_PIN 29
 
 #define G 9.81
 
@@ -57,7 +56,7 @@ float rocketAngVel[] = {0,0,0};
 float rocketAngAcc[] = {0,0,0};
 
 // CONTROLLER DYNAMICS
-float finsAngles[] = {10,10,10,10};
+float finsAngles[] = {0,0,0,0};
 
 // SUPERVISOR
 float setApogee = 3000;
@@ -74,7 +73,8 @@ float changeApogeeError = 0;
 // BNO055
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 // id, address.
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29);
 
 // BMP390
 Adafruit_BMP3XX bmp;
@@ -95,10 +95,13 @@ void setup() {
   my_servo3.attach(SERVO3);
   my_servo4.attach(SERVO4);
   
-  my_servo1.write(10);
-  my_servo2.write(10);
-  my_servo3.write(10);
-  my_servo4.write(10);
+  int AOA=20;
+  int maxx=130;
+  int minn=10;
+  my_servo1.write(minn+AOA);
+  my_servo2.write(maxx-AOA);
+  my_servo3.write(minn+AOA);
+  my_servo4.write(maxx-AOA);
 
   // Use built in LED for indicating error
   pinMode(LED_BUILTIN, OUTPUT);
@@ -112,7 +115,6 @@ void setup() {
   /****************************************************/
   // BNO055
   /* Initialise the sensor */
-  
   if(!bno.begin()){
     /* There was a problem detecting the BNO055 ... check your connections */
     while(1){
@@ -181,7 +183,7 @@ void loop() {
   updateApogee(1);
   updateApogeeErrors();
   updateFinAngles(1);
-  writeFinAngles();
+  // writeFinAngles();
 
   /****************************************************/
   // Debug Code
@@ -204,7 +206,7 @@ void loop() {
 void setUpMemory(){ 
 //initialise the SD card, create a nice little file for our data to go in :)
   if(!SD.begin(CS)){
-    Serial.println('uh oh...that is genuinely not good');
+    Serial.println("uh oh...that is genuinely not good");
   }
   dataFile = SD.open("flightData.csv", FILE_WRITE);
 
@@ -282,7 +284,7 @@ void getIMU(){
   rocketAngVel[1] = event.gyro.y * DEG2RAD;
   rocketAngVel[2] = event.gyro.z * DEG2RAD;
 
-  //writeIMU();
+  writeIMU();
 
 }
 
