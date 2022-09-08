@@ -28,6 +28,8 @@ class ControlSys:
         self.A =  0.00105# Fin reference area for Cd Cl
         self.elevation = elevation
         self.countForSampleRate = 0
+        self.velocity_control = True
+        self.convertor = 0.001
                     
         self.r = np.array([25/1000, 0, 3/1000])
         self.finSpeedLimit = 0.05
@@ -76,14 +78,15 @@ class ControlSys:
                 Fy = (compStreamVyB/abs(compStreamVyB)) * 0.5 * Cl * self.A * rho * (compStreamVyB ** 2)
             else:
                 Fx = (compStreamVxB/abs(compStreamVxB)) * 0.5 * Cl * self.A * rho * (compStreamVxB ** 2)
-            # No lift assumption
-            #Fx = 0
-            #Fy = 0
+            # No lift assumption ----
+            # Fx = 0
+            # Fy = 0
+            # -----------------------
             F = F + np.array([Fx, Fy, Fz])
-            
             theta = i * math.pi/2
             R = np.array([[math.cos(theta), -math.sin(theta), 0], [math.sin(theta), math.cos(theta), 0], [0, 0, 1]])
             M = M + np.cross((R.dot(self.r)), np.array([Fx, Fy, Fz]))
+
         return np.concatenate((F, M), axis=None).tolist()
     
 
@@ -181,13 +184,18 @@ class ControlSys:
         #print(-derivative_gain*rate_error)
         #print(error)
 
+        # Velocity Control
+        if(self.velocity_control):
+            out = self.lastout + out*self.convertor
+
         # Limit Control
         if(out>math.pi/4.0):
             out = math.pi/4.0
         elif(out<0):
             out = 0.0
 
-        out = self.finAngleWithSpeedLim(out)
+        if(not self.velocity_control):
+            out = self.finAngleWithSpeedLim(out)
         if t<1.8:
             out=0.0
         self.lastout = out
