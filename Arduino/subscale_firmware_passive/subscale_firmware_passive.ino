@@ -4,9 +4,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
+#include <SD.h>
 #include "Adafruit_BMP3XX.h"
-#include "QSPIFBlockDevice.h"
-#include "MBRBlockDevice.h"
 
 // C: change motor to clockwise/anticlockwise
 #define SERVO1 2
@@ -15,9 +14,6 @@
 #define SERVO4 5
 
 #define BUZZ_PIN 6
-
-#define BLOCK_DEVICE_SIZE 1024 * 8 // 8 KB
-#define PARTITION_TYPE 0x0B // FAT 32
 
 #define G 9.81
 
@@ -28,8 +24,11 @@
 #define SWEEP_SIZE 1
 #define DEG2RAD PI/180.0
 
+//Use SD card instead of flash cos we ballin, and by we I mean the arduino portenta and by ballin I mean died a horrible death
+const int CS = BUILTIN_SDCARD;
+File dataFile;
+
 void setUpMemory();
-void clearMemory();
 void writeToMemory(String toWrite);
 void writeBaro();
 void writeIMU();
@@ -40,7 +39,7 @@ void getIMU();
 void updateApogee(int pred);
 void updateApogeeErrors();
 void updateFinAngles(int cont);
-//void writeFinAngles();
+void writeFinAngles();
 
 Servo my_servo1;
 Servo my_servo2;
@@ -57,7 +56,7 @@ float rocketAngVel[] = {0,0,0};
 float rocketAngAcc[] = {0,0,0};
 
 // CONTROLLER DYNAMICS
-float finsAngles[] = {0,0,0,0};
+float finsAngles[] = {10,10,10,10};
 
 // SUPERVISOR
 float setApogee = 3000;
@@ -67,12 +66,6 @@ float lastPredApogee = setApogee;
 float apogeeError = 0;
 float cumaApogeeError = 0;
 float changeApogeeError = 0;
-
-// Memory
-using namespace mbed;
-QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
-MBRBlockDevice blockDevice(&root, 1); 
-int memoryCursor = 0;
 
 /****************************************************/
 // Sensor Declerations
@@ -100,7 +93,7 @@ void setup() {
   my_servo2.attach(SERVO2);
   my_servo3.attach(SERVO3);
   my_servo4.attach(SERVO4);
-
+  
   my_servo1.write(10);
   my_servo2.write(10);
   my_servo3.write(10);
@@ -208,28 +201,19 @@ void loop() {
 }
 
 void setUpMemory(){ 
-
-  if(blockDevice.init() != 0 || blockDevice.size() != BLOCK_DEVICE_SIZE) {    
-    Serial.println("Partitioning block device...");
-    blockDevice.deinit();
-    // Allocate a FAT 32 partition
-    MBRBlockDevice::partition(&root, 1, PARTITION_TYPE, 0, BLOCK_DEVICE_SIZE);
-    blockDevice.init();
+//initialise the SD card, create a nice little file for our data to go in :)
+  if(!SD.begin(CS)){
+    Serial.println('uh oh...that is genuinely not good');
   }
+  dataFile = SD.open("flightData.csv", FILE_WRITE);
 
 }
 
 void writeToMemory(String toWrite){
-
-  const auto eraseBlockSize = blockDevice.get_erase_size();
-  const auto programBlockSize = blockDevice.get_program_size();
-  const auto messageSize = toWrite.length() + 1;
-  const unsigned int requiredEraseBlocks = ceil(messageSize / (float)  eraseBlockSize);
-  const unsigned int requiredBlocks = ceil(messageSize / (float)  programBlockSize);
-  const auto dataSize = requiredBlocks * programBlockSize;  
-  blockDevice.erase(memoryCursor, requiredEraseBlocks * eraseBlockSize);
-  blockDevice.program(toWrite.c_str(), memoryCursor, dataSize);
-  memoryCursor = memoryCursor + requiredBlocks; // maybe + 1 or + dataSize
+//we just write our string line by line, it's pretty much as easy as that. 
+//the flush command is needed as we aren't closing the file, flush just forces is to make sure everything in the buffer gets written
+  dataFile.println(toWrite);
+  dataFile.flush();
 
 }
 
@@ -297,7 +281,7 @@ void getIMU(){
   rocketAngVel[1] = event.gyro.y * DEG2RAD;
   rocketAngVel[2] = event.gyro.z * DEG2RAD;
 
-  writeIMU();
+  //writeIMU();
 
 }
 

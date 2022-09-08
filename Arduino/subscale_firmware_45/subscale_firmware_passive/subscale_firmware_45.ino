@@ -94,10 +94,10 @@ void setup() {
   my_servo3.attach(SERVO3);
   my_servo4.attach(SERVO4);
   
-  my_servo1.write(130);
-  my_servo2.write(130);
-  my_servo3.write(130);
-  my_servo4.write(130);
+  my_servo1.write(45);
+  my_servo2.write(45);
+  my_servo3.write(45);
+  my_servo4.write(45);
 
   // Use built in LED for indicating error
   pinMode(LED_BUILTIN, OUTPUT);
