@@ -29,7 +29,7 @@
 // Devices with higher bit address might not be seen properly.
 //
  
-#include <i2c_driver_wire.h>
+#include <Wire.h>
  
  
 void setup()

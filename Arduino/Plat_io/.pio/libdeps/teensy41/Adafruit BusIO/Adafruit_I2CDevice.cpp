@@ -12,7 +12,7 @@ Adafruit_I2CDevice::Adafruit_I2CDevice(uint8_t addr, TwoWire *theWire) {
   _wire = theWire;
   _begun = false;
 #ifdef ARDUINO_ARCH_SAMD
-  _maxBufferSize = 250; // as defined in i2c_driver_wire.h's RingBuffer
+  _maxBufferSize = 250; // as defined in Wire.h's RingBuffer
 #elif defined(ESP32)
   _maxBufferSize = I2C_BUFFER_LENGTH;
 #else

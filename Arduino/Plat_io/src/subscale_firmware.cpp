@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Servo.h>
 #include <math.h>
-#include "i2c_driver_wire.h"
+#include "Wire.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <SD.h>
@@ -67,6 +67,8 @@ float apogeeError = 0;
 float cumaApogeeError = 0;
 float changeApogeeError = 0;
 
+String Headers = "Time,Altitude,Velocity,AngleX,AngleY,AngleZ,AccX,AccY,AccZ,OmegaX,OmegaY,OmegaZ\n";
+
 /****************************************************/
 // Sensor Declerations
 /****************************************************/
@@ -74,7 +76,7 @@ float changeApogeeError = 0;
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 // id, address.
 
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29);
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 // BMP390
 Adafruit_BMP3XX bmp;
@@ -95,13 +97,15 @@ void setup() {
   my_servo3.attach(SERVO3);
   my_servo4.attach(SERVO4);
   
-  int AOA=20;
-  int maxx=130;
-  int minn=10;
-  my_servo1.write(minn+AOA);
-  my_servo2.write(maxx-AOA);
-  my_servo3.write(minn+AOA);
-  my_servo4.write(maxx-AOA);
+
+  //Set fin angles
+  int AOA=0;  int maxx=130;  int minn=10;
+  // individual fin calibration NEEDS TO BE UPDATED BEFORE DYNAMICS
+  int offset_1=-8;   int offset_2=-3;   int offset_3=-7;   int offset_4=-17; 
+  my_servo1.write(minn+AOA+offset_1);
+  my_servo2.write(maxx-AOA+offset_2);
+  my_servo3.write(minn+AOA+offset_3);
+  my_servo4.write(maxx-AOA+offset_4);
 
   // Use built in LED for indicating error
   pinMode(LED_BUILTIN, OUTPUT);
@@ -174,6 +178,7 @@ void setup() {
   }
 
   setUpMemory();
+  writeToMemory(Headers);
 
 }
 
@@ -187,19 +192,19 @@ void loop() {
 
   /****************************************************/
   // Debug Code
-  Serial.print("Altitude: ");
-  Serial.print(rocketPos[2], 4); Serial.println(" (m)");
+  // Serial.print("Altitude: ");
+  // Serial.print(rocketPos[2], 4); Serial.println(" (m)");
   
-  Serial.print("Orientation: ");
-  Serial.print("X: ");
-  Serial.print(rocketAngPos[0], 4);
-  Serial.print("\tY: ");
-  Serial.print(rocketAngPos[1], 4);
-  Serial.print("\tZ: ");
-  Serial.print(rocketAngPos[2], 4);
-  Serial.println("");
+  // Serial.print("Orientation: ");
+  // Serial.print("X: ");
+  // Serial.print(rocketAngPos[0], 4);
+  // Serial.print("\tY: ");
+  // Serial.print(rocketAngPos[1], 4);
+  // Serial.print("\tZ: ");
+  // Serial.print(rocketAngPos[2], 4);
+  // Serial.println("");
 
-  delay(33);
+  // delay(33);
   /****************************************************/
 }
 
@@ -215,18 +220,21 @@ void setUpMemory(){
 void writeToMemory(String toWrite){
 //we just write our string line by line, it's pretty much as easy as that. 
 //the flush command is needed as we aren't closing the file, flush just forces is to make sure everything in the buffer gets written
-  dataFile.println(toWrite);
+  //Serial.print(toWrite);
+  dataFile.print(toWrite);
   dataFile.flush();
 
 }
 
 void writeBaro(){
 
-  String toWrite = String(rocketPos[2]);
+  String toWrite = String(millis());
+  toWrite = toWrite + "," + String(rocketPos[2]);
   toWrite = toWrite + "," + String(rocketVel[2]);
   writeToMemory(toWrite);
 
 }
+
 void writeIMU(){
 
   String toWrite =  "," + String(rocketAngPos[0]);
