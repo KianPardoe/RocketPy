@@ -1,6 +1,6 @@
 #include <Servo.h>
 #include <math.h>
-#include "Wire."
+#include "Wire.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
@@ -13,9 +13,9 @@
 #define SERVO3 4
 #define SERVO4 5
 
-#define BUZZ_PIN 6
+#define BUZZ_PIN 32
 
-#define G 9.81
+#define G 9.7994
 
 #define PRO 0.3 
 #define INT 0.0
@@ -203,7 +203,7 @@ void loop() {
 void setUpMemory(){ 
 //initialise the SD card, create a nice little file for our data to go in :)
   if(!SD.begin(CS)){
-    Serial.println('uh oh...that is genuinely not good');
+    Serial.println("uh oh...that is genuinely not good");
   }
   dataFile = SD.open("flightData.csv", FILE_WRITE);
 
