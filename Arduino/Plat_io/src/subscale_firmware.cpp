@@ -7,7 +7,6 @@
 #include <SD.h>
 #include "Adafruit_BMP3XX.h"
 
-// C: change motor to clockwise/anticlockwise
 #define SERVO1 11
 #define SERVO2 25
 #define SERVO3 28
@@ -23,6 +22,18 @@
 
 #define SWEEP_SIZE 1
 #define DEG2RAD PI/180.0
+
+// FIN OFFSETS
+#define FIN_MAX 130
+#define FIN_MIN 10
+#define OFFSET_1 -8
+#define OFFSET_2 -3
+#define OFFSET_3 -7
+#define OFFSET_4 -17
+
+// FIN CONTROL
+#define HEIGHT_ACTIVE 6.5
+#define FIXED_FIN_ANGLE 90
 
 //Use SD card instead of flash cos we ballin, and by we I mean the arduino portenta and by ballin I mean died a horrible death
 const int CS = BUILTIN_SDCARD;
@@ -67,7 +78,10 @@ float apogeeError = 0;
 float cumaApogeeError = 0;
 float changeApogeeError = 0;
 
-String Headers = "Time,Altitude,Velocity,AngleX,AngleY,AngleZ,AccX,AccY,AccZ,OmegaX,OmegaY,OmegaZ\n";
+// TIMING
+int last_millis = 0;
+
+String Headers = "Time,Altitude,Velocity,AngleX,AngleY,AngleZ,AccX,AccY,AccZ,OmegaX,OmegaY,OmegaZ,Prediction\n";
 
 /****************************************************/
 // Sensor Declerations
@@ -99,13 +113,11 @@ void setup() {
   
 
   //Set fin angles
-  int AOA=0;  int maxx=130;  int minn=10;
-  // individual fin calibration NEEDS TO BE UPDATED BEFORE DYNAMICS
-  int offset_1=-8;   int offset_2=-3;   int offset_3=-7;   int offset_4=-17; 
-  my_servo1.write(minn+AOA+offset_1);
-  my_servo2.write(maxx-AOA+offset_2);
-  my_servo3.write(minn+AOA+offset_3);
-  my_servo4.write(maxx-AOA+offset_4);
+  int AOA=0;
+  my_servo1.write(FIN_MIN+AOA+OFFSET_1);
+  my_servo2.write(FIN_MAX-AOA+OFFSET_2);
+  my_servo3.write(FIN_MIN+AOA+OFFSET_3);
+  my_servo4.write(FIN_MAX-AOA+OFFSET_4);
 
   // Use built in LED for indicating error
   pinMode(LED_BUILTIN, OUTPUT);
@@ -187,25 +199,8 @@ void loop() {
   getIMU();
   updateApogee(1);
   updateApogeeErrors();
-  updateFinAngles(1);
+  updateFinAngles(0);
   // writeFinAngles();
-
-  /****************************************************/
-  // Debug Code
-  // Serial.print("Altitude: ");
-  // Serial.print(rocketPos[2], 4); Serial.println(" (m)");
-  
-  // Serial.print("Orientation: ");
-  // Serial.print("X: ");
-  // Serial.print(rocketAngPos[0], 4);
-  // Serial.print("\tY: ");
-  // Serial.print(rocketAngPos[1], 4);
-  // Serial.print("\tZ: ");
-  // Serial.print(rocketAngPos[2], 4);
-  // Serial.println("");
-
-  // delay(33);
-  /****************************************************/
 }
 
 void setUpMemory(){ 
@@ -263,8 +258,8 @@ void getAltitude(){
   // C: get altitude from barometers
   float hold = rocketPos[2];
   rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
-  rocketVel[2] = rocketPos[2] - hold;
-  // rocketVel[2] = ((rocketPos[2] - rocketPos[2])/2+rocketVel[2])/2; % filter version
+  rocketVel[2] = (rocketPos[2] - hold)/(millis()/1000-last_millis/1000);
+  last_millis = millis();
   writeBaro();
 
 }
@@ -300,10 +295,10 @@ void updateApogee(int pred){
 
     double p = rocketPos[2];
     double v = rocketVel[2];
-    double a = rocketAcc[2]-G;
+    double a = rocketAcc[0]-G;
     
     if(pred==1){
-      predApogee = v*v*log(abs((a)/G))/(2*abs(a+G)) + p;
+      predApogee = v*v*log(abs(a/G))/(2*abs(a+G)) + p;
     }
     
     if(pred==2){
@@ -324,17 +319,28 @@ void updateApogeeErrors(){
 
 void updateFinAngles(int cont){
 
+  double AOA;
+
+  if(cont==0){
+    AOA = FIXED_FIN_ANGLE;
+  }
+  
   if(cont==1){
-    double out = PRO*apogeeError + INT*cumaApogeeError + DER*changeApogeeError;
-    finsAngles[0] = -out;
-    finsAngles[1] = out;
-    finsAngles[2] = out;
-    finsAngles[3] = -out;
+    AOA = PRO*apogeeError + INT*cumaApogeeError + DER*changeApogeeError;
   }
   
   //if(cont==2){
     // C: lqr 2
   //}
+
+  if(rocketPos[2]<HEIGHT_ACTIVE){
+    AOA = 0;
+  }
+
+  finsAngles[0] = -FIN_MIN+AOA+OFFSET_1;
+  finsAngles[1] = FIN_MAX-AOA+OFFSET_2;
+  finsAngles[2] = FIN_MIN+AOA+OFFSET_3;
+  finsAngles[3] = -FIN_MAX-AOA+OFFSET_4;
  
 }
 
