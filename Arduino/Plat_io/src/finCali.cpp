@@ -1,10 +1,10 @@
 // #include <Arduino.h>
 // #include <Servo.h>
 
-// #define SERVO1 11
-// #define SERVO2 25
-// #define SERVO3 28
-// #define SERVO4 24
+// #define SERVO1 6
+// #define SERVO2 8
+// #define SERVO3 10
+// #define SERVO4 12
 
 // void changeAngle();
 // void writeFinAngles();

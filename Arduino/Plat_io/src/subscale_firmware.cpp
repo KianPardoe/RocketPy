@@ -7,12 +7,12 @@
 #include <SD.h>
 #include "Adafruit_BMP3XX.h"
 
-#define SERVO1 11
-#define SERVO2 25
-#define SERVO3 28
-#define SERVO4 24
+#define SERVO1 6
+#define SERVO2 8
+#define SERVO3 10
+#define SERVO4 12
 
-#define BUZZ_PIN 29
+#define BUZZ_PIN 32
 
 #define G 9.81
 
@@ -26,18 +26,26 @@
 // FIN OFFSETS
 #define FIN_MAX 130
 #define FIN_MIN 10
+//0 DEG
 #define OFFSET_1 -8
 #define OFFSET_2 -3
 #define OFFSET_3 -7
-#define OFFSET_4 -17
+#define OFFSET_4 0
+//90 DEG
+#define OFFSET_1 0
+#define OFFSET_2 -18
+#define OFFSET_3 -2
+#define OFFSET_4 -5
 
 // FIN CONTROL
-#define HEIGHT_ACTIVE 6.5
+#define HEIGHT_ACTIVE 0.5
 #define FIXED_FIN_ANGLE 90
 
 //Use SD card instead of flash cos we ballin, and by we I mean the arduino portenta and by ballin I mean died a horrible death
 const int CS = BUILTIN_SDCARD;
 File dataFile;
+
+int i=0;
 
 void setUpMemory();
 void writeToMemory(String toWrite);
@@ -200,7 +208,7 @@ void loop() {
   updateApogee(1);
   updateApogeeErrors();
   updateFinAngles(0);
-  // writeFinAngles();
+  writeFinAngles();
 }
 
 void setUpMemory(){ 
@@ -337,10 +345,19 @@ void updateFinAngles(int cont){
     AOA = 0;
   }
 
-  finsAngles[0] = -FIN_MIN+AOA+OFFSET_1;
+  Serial.print(AOA);
+  Serial.print("   ");
+  Serial.print(rocketPos[2]);
+  i++;
+ if(i==5){
+ Serial.print("\n");
+ i=0;
+ }
+
+  finsAngles[0] = FIN_MIN+AOA+OFFSET_1;
   finsAngles[1] = FIN_MAX-AOA+OFFSET_2;
   finsAngles[2] = FIN_MIN+AOA+OFFSET_3;
-  finsAngles[3] = -FIN_MAX-AOA+OFFSET_4;
+  finsAngles[3] = FIN_MAX-AOA+OFFSET_4;
  
 }
 
