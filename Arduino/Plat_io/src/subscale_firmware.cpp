@@ -34,12 +34,12 @@
 //90 DEG
 #define MAX_OFFSET_1 0
 #define MAX_OFFSET_2 -18
-#define MAX_OFFSET_3 -2
+#define MAX_OFFSET_3 0
 #define MAX_OFFSET_4 -5
 
 // FIN CONTROL
-#define HEIGHT_ACTIVE 0.5
-#define FIXED_FIN_ANGLE 90
+#define HEIGHT_ACTIVE 3
+#define FIXED_FIN_ANGLE 0
 
 //Use SD card instead of flash cos we ballin, and by we I mean the arduino portenta and by ballin I mean died a horrible death
 const int CS = BUILTIN_SDCARD;
@@ -367,10 +367,10 @@ void writeFinAngles(){
   int offset1 = (MAX_OFFSET_1-MIN_OFFSET_1)*abs(finsAngles[0])/90+MIN_OFFSET_1;
   int offset2 = (MAX_OFFSET_2-MIN_OFFSET_2)*abs(finsAngles[1])/90+MIN_OFFSET_2;
   int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*abs(finsAngles[2])/90+MIN_OFFSET_3;
-  int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*abs(finsAngles[3])/90+MIN_OFFSET_4
+  int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*abs(finsAngles[3])/90+MIN_OFFSET_4;
   my_servo1.write(FIN_MIN+finsAngles[0]+offset1);
   my_servo2.write(FIN_MAX+finsAngles[1]+offset2);
-  my_servo3.write(FIN_MIN+finsAngles[1]+offset3);
-  my_servo4.write(FIN_MAX+finsAngles[1]+offset4);
+  my_servo3.write(FIN_MIN+finsAngles[2]+offset3);
+  my_servo4.write(FIN_MAX+finsAngles[3]+offset4);
 
 }

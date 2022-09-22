@@ -72,21 +72,21 @@
 
 // void loop() {
 
-// //   for(int pos = minn; pos <= maxx; pos = pos +SWEEP_SIZE){
-// //      my_servo1.write(pos);
-// //      my_servo2.write(maxx+minn-pos);
-// //      my_servo3.write(pos);
-// //      my_servo4.write(maxx+minn-pos);
-// //     delay(10);    
-// //   }
-// // delay(200);
-// //   for(int pos = maxx; pos >= minn; pos = pos -SWEEP_SIZE){
-// //      my_servo1.write(pos);
-// //      my_servo2.write(maxx+minn-pos);
-// //      my_servo3.write(pos);
-// //      my_servo4.write(maxx+minn-pos);
-// //     delay(10); 
-// //   }
+//   for(int pos = minn; pos <= maxx; pos = pos +SWEEP_SIZE){
+//      my_servo1.write(pos);
+//      my_servo2.write(maxx+minn-pos);
+//      my_servo3.write(pos);
+//      my_servo4.write(maxx+minn-pos);
+//     delay(10);    
+//   }
+// delay(200);
+//   for(int pos = maxx; pos >= minn; pos = pos -SWEEP_SIZE){
+//      my_servo1.write(pos);
+//      my_servo2.write(maxx+minn-pos);
+//      my_servo3.write(pos);
+//      my_servo4.write(maxx+minn-pos);
+//     delay(10); 
+//   }
  
 // }
 
