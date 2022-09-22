@@ -27,15 +27,15 @@
 #define FIN_MAX 130
 #define FIN_MIN 10
 //0 DEG
-#define OFFSET_1 -8
-#define OFFSET_2 -3
-#define OFFSET_3 -7
-#define OFFSET_4 0
+#define MIN_OFFSET_1 -8
+#define MIN_OFFSET_2 -3
+#define MIN_OFFSET_3 -7
+#define MIN_OFFSET_4 0
 //90 DEG
-#define OFFSET_1 0
-#define OFFSET_2 -18
-#define OFFSET_3 -2
-#define OFFSET_4 -5
+#define MAX_OFFSET_1 0
+#define MAX_OFFSET_2 -18
+#define MAX_OFFSET_3 -2
+#define MAX_OFFSET_4 -5
 
 // FIN CONTROL
 #define HEIGHT_ACTIVE 0.5
@@ -57,6 +57,7 @@ void getAltitude();
 void getIMU();
 void updateApogee(int pred);
 void updateApogeeErrors();
+void updateOffset(int AOA);
 void updateFinAngles(int cont);
 void writeFinAngles();
 
@@ -122,10 +123,10 @@ void setup() {
 
   //Set fin angles
   int AOA=0;
-  my_servo1.write(FIN_MIN+AOA+OFFSET_1);
-  my_servo2.write(FIN_MAX-AOA+OFFSET_2);
-  my_servo3.write(FIN_MIN+AOA+OFFSET_3);
-  my_servo4.write(FIN_MAX-AOA+OFFSET_4);
+  my_servo1.write(FIN_MIN+AOA+MIN_OFFSET_1);
+  my_servo2.write(FIN_MAX-AOA+MIN_OFFSET_2);
+  my_servo3.write(FIN_MIN+AOA+MIN_OFFSET_3);
+  my_servo4.write(FIN_MAX-AOA+MIN_OFFSET_4);
 
   // Use built in LED for indicating error
   pinMode(LED_BUILTIN, OUTPUT);
@@ -354,18 +355,22 @@ void updateFinAngles(int cont){
  i=0;
  }
 
-  finsAngles[0] = FIN_MIN+AOA+OFFSET_1;
-  finsAngles[1] = FIN_MAX-AOA+OFFSET_2;
-  finsAngles[2] = FIN_MIN+AOA+OFFSET_3;
-  finsAngles[3] = FIN_MAX-AOA+OFFSET_4;
+  finsAngles[0] = AOA;
+  finsAngles[1] = -AOA;
+  finsAngles[2] = AOA;
+  finsAngles[3] = -AOA;
  
 }
 
 void writeFinAngles(){
 
-  my_servo1.write(finsAngles[0]);
-  my_servo2.write(finsAngles[1]);
-  my_servo3.write(finsAngles[2]);
-  my_servo4.write(finsAngles[3]);
+  int offset1 = (MAX_OFFSET_1-MIN_OFFSET_1)*abs(finsAngles[0])/90+MIN_OFFSET_1;
+  int offset2 = (MAX_OFFSET_2-MIN_OFFSET_2)*abs(finsAngles[1])/90+MIN_OFFSET_2;
+  int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*abs(finsAngles[2])/90+MIN_OFFSET_3;
+  int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*abs(finsAngles[3])/90+MIN_OFFSET_4
+  my_servo1.write(FIN_MIN+finsAngles[0]+offset1);
+  my_servo2.write(FIN_MAX+finsAngles[1]+offset2);
+  my_servo3.write(FIN_MIN+finsAngles[1]+offset3);
+  my_servo4.write(FIN_MAX+finsAngles[1]+offset4);
 
 }
