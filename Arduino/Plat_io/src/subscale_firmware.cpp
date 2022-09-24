@@ -267,7 +267,7 @@ void getAltitude(){
   // C: get altitude from barometers
   float hold = rocketPos[2];
   rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
-  rocketVel[2] = (rocketPos[2] - hold)/(millis()/1000-last_millis/1000);
+  rocketVel[2] = (rocketPos[2] - hold)/((float)millis()/1000.0-(float)last_millis/1000.0);
   last_millis = millis();
   writeBaro();
 
