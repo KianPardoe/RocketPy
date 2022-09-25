@@ -200,6 +200,7 @@ void setup() {
       digitalWrite(BUZZ_PIN, HIGH);
       delay(1000);
       digitalWrite(BUZZ_PIN, LOW);
+      digitalWrite(LED_BUILTIN, HIGH);
       break;
     }
   }
@@ -220,7 +221,7 @@ void loop() {
   writeBaro();
   writeIMU();
   writePredict();
-
+  delay(10);
 }
 
 void setUpMemory(){ 
@@ -288,7 +289,7 @@ void getAltitude(){
 }
 
 void getIMU(){
-  
+  unsigned long start = millis();
   // C: get IMU data, get acceleration or whatever
   /* Get a new sensor event */
   sensors_event_t event;
@@ -309,6 +310,11 @@ void getIMU(){
   rocketAngVel[0] = event.gyro.x * DEG2RAD;
   rocketAngVel[1] = event.gyro.y * DEG2RAD;
   rocketAngVel[2] = event.gyro.z * DEG2RAD;
+
+  last_millis = millis();
+  Serial.print("Get IMU Takes: ");
+  Serial.print(millis()-start);
+  Serial.print("ms\n");
 
 }
 
@@ -362,14 +368,6 @@ void updateFinAngles(int cont){
     AOA = 0;
   }
 
-  Serial.print(AOA);
-  Serial.print("   ");
-  Serial.print(rocketPos[2]);
-  i++;
- if(i==5){
- Serial.print("\n");
- i=0;
- }
 
   finsAngles[0] = AOA;
   finsAngles[1] = -AOA;
