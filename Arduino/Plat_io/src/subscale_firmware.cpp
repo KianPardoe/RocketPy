@@ -276,10 +276,14 @@ void writePredict(){
 void getAltitude(){
   
   // C: get altitude from barometers
+  unsigned long start = millis();
   float hold = rocketPos[2];
   rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
   rocketVel[2] = (rocketPos[2] - hold)/((float)millis()/1000.0-(float)last_millis/1000.0);
   last_millis = millis();
+  Serial.print("Get Altitude Takes: ");
+  Serial.print(millis()-start);
+  Serial.print("ms\n");
 
 }
 
