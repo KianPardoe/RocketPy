@@ -55,6 +55,8 @@ void writePredict();
 
 void getAltitude();
 void getIMU();
+void getKalmanFilterPred();
+
 void updateApogee(int pred);
 void updateApogeeErrors();
 void updateOffset(int AOA);
@@ -75,8 +77,12 @@ float rocketAngPos[] = {0,0,0};
 float rocketAngVel[] = {0,0,0};
 float rocketAngAcc[] = {0,0,0};
 
+
 // CONTROLLER DYNAMICS
 float finsAngles[] = {0,0,0,0};
+
+// KALMAN FILTER
+float rocketKF[] = {0,0,0};
 
 // SUPERVISOR
 float setApogee = 3000;
@@ -210,6 +216,11 @@ void loop() {
   updateApogeeErrors();
   updateFinAngles(0);
   writeFinAngles();
+
+  writeBaro();
+  writeIMU();
+  writePredict();
+
 }
 
 void setUpMemory(){ 
@@ -269,7 +280,6 @@ void getAltitude(){
   rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
   rocketVel[2] = (rocketPos[2] - hold)/((float)millis()/1000.0-(float)last_millis/1000.0);
   last_millis = millis();
-  writeBaro();
 
 }
 
@@ -296,25 +306,27 @@ void getIMU(){
   rocketAngVel[1] = event.gyro.y * DEG2RAD;
   rocketAngVel[2] = event.gyro.z * DEG2RAD;
 
-  writeIMU();
+}
+
+void getKalmanFilterPred(){
+
+  
 
 }
 
 void updateApogee(int pred){
 
-    double p = rocketPos[2];
-    double v = rocketVel[2];
-    double a = rocketAcc[0]-G;
-    
-    if(pred==1){
-      predApogee = v*v*log(abs(a/G))/(2*abs(a+G)) + p;
-    }
-    
-    if(pred==2){
-      // C: predictor 2 needs Cd values
-    }
-
-    writePredict();
+  double p = rocketPos[2];
+  double v = rocketVel[2];
+  double a = rocketAcc[0]-G;
+  
+  if(pred==1){
+    predApogee = v*v*log(abs(a/G))/(2*abs(a+G)) + p;
+  }
+  
+  if(pred==2){
+    // C: predictor 2 needs Cd values
+  }
     
 }
 
@@ -369,8 +381,8 @@ void writeFinAngles(){
   int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*abs(finsAngles[2])/90+MIN_OFFSET_3;
   int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*abs(finsAngles[3])/90+MIN_OFFSET_4;
   my_servo1.write(FIN_MIN+finsAngles[0]+offset1);
-  // my_servo2.write(FIN_MAX+finsAngles[1]+offset2);
+  my_servo2.write(FIN_MAX+finsAngles[1]+offset2);
   my_servo3.write(FIN_MIN+finsAngles[2]+offset3);
-  // my_servo4.write(FIN_MAX+finsAngles[3]+offset4);
+  my_servo4.write(FIN_MAX+finsAngles[3]+offset4);
 
 }
