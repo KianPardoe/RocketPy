@@ -6,6 +6,7 @@
 #include <Adafruit_BNO055.h>
 #include <SD.h>
 #include "Adafruit_BMP3XX.h"
+#include <ArduinoEigen.h>
 
 #define SERVO1 6
 #define SERVO2 8
@@ -41,6 +42,22 @@
 #define HEIGHT_ACTIVE 3
 #define FIXED_FIN_ANGLE 45
 
+// Kalman Filter Variables
+Eigen::Matrix<float, 3, 1> Xk;         // State Vector
+Eigen::Matrix<float, 3, 1> Xkp_min;    // X_{k+1}^-
+Eigen::Matrix<float, 2, 1> Y;          // Measurment Vector
+Eigen::Matrix<float, 2, 1> Ykp_min;    // Y_{k+1}^-
+Eigen::Matrix<float, 2, 3> C;          // Measurment Matrix y = Cx + Du
+Eigen::Matrix<float, 3, 3> F;          // State Transition Matrix
+Eigen::Matrix<float, 3, 3> Pk;         // State Estimate Covariance
+Eigen::Matrix<float, 3, 3> Pkp_min;    // P_{k+1}^-
+Eigen::Matrix<float, 2, 2> R;          // Sensor Covariance
+Eigen::Matrix<float, 3, 3> Q;          // Model Covariance
+Eigen::Matrix<float, 3, 2> K;          // Kalman Gain
+Eigen::Matrix<float, 2, 2> S;          // Measurement prediction covariance
+Eigen::Matrix<float, 3, 3> I;          // Identity Matrix
+
+
 //Use SD card instead of flash cos we ballin, and by we I mean the arduino portenta and by ballin I mean died a horrible death
 const int CS = BUILTIN_SDCARD;
 File dataFile;
@@ -49,10 +66,13 @@ int i=0;
 
 void setUpMemory();
 void writeToMemory(String toWrite);
+void writeTime();
 void writeBaro();
+void writeVel();
 void writeIMU();
 void writePredict();
 
+void getTime();
 void getAltitude();
 void getIMU();
 void getKalmanFilterPred();
@@ -69,19 +89,24 @@ Servo my_servo3;
 Servo my_servo4;
 
 // ROCKET DYNAMICS
-float rocketPos[] = {0,0,0};
-float rocketVel[] = {0,0,0};
-float rocketAcc[] = {0,0,0};
+struct xyzType{
+  float x;
+  float y;
+  float z;
+};
 
-float rocketAngPos[] = {0,0,0};
-float rocketAngVel[] = {0,0,0};
-float rocketAngAcc[] = {0,0,0};
+xyzType rocketPos = {0,0,0};
+xyzType rocketVel = {0,0,0};
+xyzType rocketAcc = {0,0,0};
+
+xyzType rocketAngPos = {0,0,0};
+xyzType rocketAngVel = {0,0,0};
 
 
 // CONTROLLER DYNAMICS
 float finsAngles[] = {0,0,0,0};
 
-// KALMAN FILTER
+// KALMAN FILTERED STATE VECTOR (Height, Velocity, Acceleration)
 float rocketKF[] = {0,0,0};
 
 // SUPERVISOR
@@ -94,7 +119,8 @@ float cumaApogeeError = 0;
 float changeApogeeError = 0;
 
 // TIMING
-int last_millis = 0;
+float delta_T;
+unsigned long last_millis = 0;
 
 String Headers = "Time,Altitude,Velocity,AngleX,AngleY,AngleZ,AccX,AccY,AccZ,OmegaX,OmegaY,OmegaZ,Prediction\n";
 
@@ -113,13 +139,30 @@ float groundLevelPressurehPa = 1013.25;  // (hPa) Gets changed on setup to curre
 
 /****************************************************/
 
+
 void setup() {
-  /****************************************************/
-  // Debug Code
-  Serial.begin(115200);
-  Serial.println("Orientation Sensor Test"); Serial.println("");
+
+// Initialise Kalman Filter Variables
+Xk << 0, 0, 0;
+
+C << 1, 0, 0,
+      0, 0, 1;
+
+Pk << 0, 0, 0,
+      0, 0, 0,
+      0, 0, 0;
+
+R << 0.001, 0,
+      0, 0.1;
+
+Q << 0.000001, 0, 0,
+      0, 0, 0,
+      0, 0, 0.1;
+
+I << 1, 0, 0,
+      0, 1, 0,
+      0, 0, 1;
   
-  /****************************************************/
   // Servos
   my_servo1.attach(SERVO1);
   my_servo2.attach(SERVO2);
@@ -211,23 +254,27 @@ void setup() {
 }
 
 void loop() {
+  getTime();
   getAltitude();
   getIMU();
+  getKalmanFilterPred();
   updateApogee(1);
   updateApogeeErrors();
   updateFinAngles(0);
   writeFinAngles();
 
+  writeTime();
   writeBaro();
+  writeVel();
   writeIMU();
   writePredict();
-  delay(10);
+  writeToMemory("\n");
 }
 
 void setUpMemory(){ 
 //initialise the SD card, create a nice little file for our data to go in :)
   if(!SD.begin(CS)){
-    Serial.println("uh oh...that is genuinely not good");
+    digitalWrite(BUZZ_PIN, HIGH);
   }
   dataFile = SD.open("flightData.csv", FILE_WRITE);
 
@@ -236,32 +283,46 @@ void setUpMemory(){
 void writeToMemory(String toWrite){
 //we just write our string line by line, it's pretty much as easy as that. 
 //the flush command is needed as we aren't closing the file, flush just forces is to make sure everything in the buffer gets written
-  //Serial.print(toWrite);
   dataFile.print(toWrite);
   dataFile.flush();
 
 }
 
+void writeTime(){
+
+  String toWrite = String(last_millis);
+  toWrite = toWrite + ",";
+  writeToMemory(toWrite);
+
+}
+
 void writeBaro(){
 
-  String toWrite = String(millis());
-  toWrite = toWrite + "," + String(rocketPos[2]);
-  toWrite = toWrite + "," + String(rocketVel[2]);
+  String toWrite = String(rocketPos.z);
+  toWrite = toWrite + ",";
+  writeToMemory(toWrite);
+
+}
+
+void writeVel(){
+
+  String toWrite = String(rocketVel.z);
+  toWrite = toWrite + ",";
   writeToMemory(toWrite);
 
 }
 
 void writeIMU(){
 
-  String toWrite =  "," + String(rocketAngPos[0]);
-  toWrite = toWrite + "," + String(rocketAngPos[1]);
-  toWrite = toWrite + "," + String(rocketAngPos[2]);
-  toWrite = toWrite + "," + String(rocketAcc[0]);
-  toWrite = toWrite + "," + String(rocketAcc[1]);
-  toWrite = toWrite + "," + String(rocketAcc[2]);
-  toWrite = toWrite + "," + String(rocketAngVel[0]);
-  toWrite = toWrite + "," + String(rocketAngVel[1]);
-  toWrite = toWrite + "," + String(rocketAngVel[2]);
+  String toWrite =  "," + String(rocketAngPos.x);
+  toWrite = toWrite + "," + String(rocketAngPos.y);
+  toWrite = toWrite + "," + String(rocketAngPos.z);
+  toWrite = toWrite + "," + String(rocketAcc.x);
+  toWrite = toWrite + "," + String(rocketAcc.y);
+  toWrite = toWrite + "," + String(rocketAcc.z);
+  toWrite = toWrite + "," + String(rocketAngVel.x);
+  toWrite = toWrite + "," + String(rocketAngVel.y);
+  toWrite = toWrite + "," + String(rocketAngVel.z);
   
   writeToMemory(toWrite);
 
@@ -269,66 +330,81 @@ void writeIMU(){
 
 void writePredict(){
 
-  String toWrite =  "," + String(predApogee) + "\n";
+  String toWrite =  "," + String(predApogee);
   writeToMemory(toWrite);
   
+}
+
+void getTime(){
+
+  unsigned long temp = millis();
+  delta_T = ((float)(temp - last_millis))/1000.0f;
+  last_millis = temp;
+
 }
 
 void getAltitude(){
   
   // C: get altitude from barometers
-  unsigned long start = millis();
-  float hold = rocketPos[2];
-  rocketPos[2] = bmp.readAltitude(groundLevelPressurehPa);
-  rocketVel[2] = (rocketPos[2] - hold)/((float)millis()/1000.0-(float)last_millis/1000.0);
-  last_millis = millis();
-  Serial.print("Get Altitude Takes: ");
-  Serial.print(millis()-start);
-  Serial.print("ms\n");
+  rocketPos.z = bmp.readAltitude(groundLevelPressurehPa);
 
 }
 
 void getIMU(){
-  unsigned long start = millis();
+
   // C: get IMU data, get acceleration or whatever
   /* Get a new sensor event */
   sensors_event_t event;
   // Get Orientation
   bno.getEvent(&event);
-  rocketAngPos[0] = event.orientation.x * DEG2RAD;
-  rocketAngPos[1] = event.orientation.y * DEG2RAD;
-  rocketAngPos[2] = event.orientation.z * DEG2RAD;
+  rocketAngPos.x = event.orientation.y * DEG2RAD;
+  rocketAngPos.y = event.orientation.z * DEG2RAD;
+  rocketAngPos.z = event.orientation.x * DEG2RAD;
   
   // Get Linear Acceleration (m/s^2)
   bno.getEvent(&event, Adafruit_BNO055::VECTOR_LINEARACCEL);
-  rocketAcc[0] = event.acceleration.x;
-  rocketAcc[1] = event.acceleration.y;
-  rocketAcc[2] = event.acceleration.z;
+  rocketAcc.x = event.acceleration.y;
+  rocketAcc.y = event.acceleration.z;
+  rocketAcc.z = event.acceleration.x;
 
   // Get Angular Velocity (deg/s)
   bno.getEvent(&event, Adafruit_BNO055::VECTOR_GYROSCOPE);
-  rocketAngVel[0] = event.gyro.x * DEG2RAD;
-  rocketAngVel[1] = event.gyro.y * DEG2RAD;
-  rocketAngVel[2] = event.gyro.z * DEG2RAD;
-
-  last_millis = millis();
-  Serial.print("Get IMU Takes: ");
-  Serial.print(millis()-start);
-  Serial.print("ms\n");
+  rocketAngVel.x = event.gyro.y * DEG2RAD;
+  rocketAngVel.y = event.gyro.z * DEG2RAD;
+  rocketAngVel.z = event.gyro.x * DEG2RAD;
 
 }
+
 
 void getKalmanFilterPred(){
+  
+  Y << rocketPos.z, rocketAcc.z;
 
-  // KIAN IMPLEMENT THIS BRO
+  F << 1, delta_T, 0.5*delta_T*delta_T,
+  0, 1, delta_T,
+  0, 0, 1;
 
+  Xkp_min << F * Xk;
+  Ykp_min << C * Xkp_min;
+  Pkp_min << F * Pk * F.transpose() + Q;
+  S << C * Pkp_min * C.transpose() + R;
+  K << Pkp_min * C.transpose() * S.inverse();
+  Xk << Xkp_min + K * (Y - Ykp_min);
+  Pk << (I - K * C) * Pkp_min;
+
+  // Assign velocity to rocketVel and rocketKF variables
+  rocketVel.z = Xk(1);
+  rocketKF[0] = Xk(0);
+  rocketKF[1] = Xk(1);
+  rocketKF[2] = Xk(2);
 }
+
 
 void updateApogee(int pred){
 
-  double p = rocketPos[2];
-  double v = rocketVel[2];
-  double a = rocketAcc[0]-G;
+  double p = rocketPos.z;
+  double v = rocketVel.z;
+  double a = rocketAcc.x-G;
   
   if(pred==1){
     predApogee = v*v*log(abs(a/G))/(2*abs(a+G)) + p;
@@ -364,7 +440,7 @@ void updateFinAngles(int cont){
     // C: lqr 2
   //}
 
-  if(rocketPos[2]<HEIGHT_ACTIVE){
+  if(rocketPos.z<HEIGHT_ACTIVE){
     AOA = 0;
   }
 
