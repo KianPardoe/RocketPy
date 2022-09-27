@@ -314,7 +314,7 @@ void writeVel(){
 
 void writeIMU(){
 
-  String toWrite =  "," + String(rocketAngPos.x);
+  String toWrite = String(rocketAngPos.x);
   toWrite = toWrite + "," + String(rocketAngPos.y);
   toWrite = toWrite + "," + String(rocketAngPos.z);
   toWrite = toWrite + "," + String(rocketAcc.x);
