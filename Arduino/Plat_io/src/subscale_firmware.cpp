@@ -404,7 +404,7 @@ void updateApogee(int pred){
 
   double p = rocketPos.z;
   double v = rocketVel.z;
-  double a = rocketAcc.x-G;
+  double a = rocketAcc.z-G;
   
   if(pred==1){
     predApogee = v*v*log(abs(a/G))/(2*abs(a+G)) + p;
