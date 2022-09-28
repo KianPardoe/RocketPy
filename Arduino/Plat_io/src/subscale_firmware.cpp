@@ -141,6 +141,7 @@ float groundLevelPressurehPa = 1013.25;  // (hPa) Gets changed on setup to curre
 
 
 void setup() {
+  Serial.begin(115200);
 
 // Initialise Kalman Filter Variables
 Xk << 0, 0, 0;
@@ -399,21 +400,51 @@ void getKalmanFilterPred(){
   rocketKF[2] = Xk(2);
 }
 
-
 void updateApogee(int pred){
 
   double p = rocketPos.z;
   double v = rocketVel.z;
   double a = rocketAcc.z-G;
   
-  if(pred==1){
-    predApogee = v*v*log(abs(a/G))/(2*abs(a+G)) + p;
+
+  if(pred==1){   
+    predApogee = v*v*log(fabs(a/G))/(2*fabs(a+G)) + p;
   }
   
   if(pred==2){
     // C: predictor 2 needs Cd values
   }
     
+
+  Serial.print("PRED=");
+  Serial.print(predApogee);
+  Serial.print("________");
+  Serial.print("p=");
+  Serial.print(p);
+  Serial.print("________");
+  Serial.print("v=");
+  Serial.print(v);
+  Serial.print("________");
+  Serial.print("a=");
+  Serial.print(a);
+  Serial.print("________");
+  Serial.print("G=");
+  Serial.print(G);
+  Serial.print("________");
+
+  Serial.print("log(fabs(a/G))=");
+  Serial.print(log(fabs(a/G)));
+  Serial.print("________");
+  Serial.print("fabs(a+G)=");
+  Serial.print(fabs(a+G));
+  Serial.print("________");
+  Serial.print("v^2=");
+  Serial.print(v*v);
+  Serial.print("________");
+
+
+  Serial.print("\n");
+
 }
 
 void updateApogeeErrors(){
