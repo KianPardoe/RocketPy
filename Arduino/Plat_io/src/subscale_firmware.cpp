@@ -344,9 +344,9 @@ void writePredict(){
 void writeFinAngles(){
 
   String toWrite =  "," + String(finsAngles[0]);
-  String toWrite =  "," + String(finsAngles[1]);
-  String toWrite =  "," + String(finsAngles[2]);
-  String toWrite =  "," + String(finsAngles[3]);
+  toWrite = toWrite + "," + String(finsAngles[1]);
+  toWrite = toWrite + "," + String(finsAngles[2]);
+  toWrite = toWrite + "," + String(finsAngles[3]);
   writeToMemory(toWrite);
 
 }
