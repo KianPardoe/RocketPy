@@ -71,6 +71,7 @@ void writeBaro();
 void writeVel();
 void writeIMU();
 void writePredict();
+void writeFinAngles();
 
 void getTime();
 void getAltitude();
@@ -81,7 +82,9 @@ void updateApogee(int pred);
 void updateApogeeErrors();
 void updateOffset(int AOA);
 void updateFinAngles(int cont);
-void writeFinAngles();
+void sendFinAngles();
+
+
 
 Servo my_servo1;
 Servo my_servo2;
@@ -122,7 +125,7 @@ float changeApogeeError = 0;
 float delta_T;
 unsigned long last_millis = 0;
 
-String Headers = "Time,Altitude,Velocity,AngleX,AngleY,AngleZ,AccX,AccY,AccZ,OmegaX,OmegaY,OmegaZ,Prediction\n";
+String Headers = "Time,Altitude,Velocity,AngleX,AngleY,AngleZ,AccX,AccY,AccZ,OmegaX,OmegaY,OmegaZ,Prediction,finAng1,finAng2,finAng3,finAng4\n";
 
 /****************************************************/
 // Sensor Declerations
@@ -262,14 +265,16 @@ void loop() {
   updateApogee(1);
   updateApogeeErrors();
   updateFinAngles(0);
-  writeFinAngles();
+  sendFinAngles();
 
   writeTime();
   writeBaro();
   writeVel();
   writeIMU();
   writePredict();
+  writeFinAngles();
   writeToMemory("\n");
+
 }
 
 void setUpMemory(){ 
@@ -336,6 +341,17 @@ void writePredict(){
   
 }
 
+void writeFinAngles(){
+
+  String toWrite =  "," + String(finsAngles[0]);
+  String toWrite =  "," + String(finsAngles[1]);
+  String toWrite =  "," + String(finsAngles[2]);
+  String toWrite =  "," + String(finsAngles[3]);
+  writeToMemory(toWrite);
+
+}
+
+
 void getTime(){
 
   unsigned long temp = millis();
@@ -376,7 +392,6 @@ void getIMU(){
 
 }
 
-
 void getKalmanFilterPred(){
   
   Y << rocketPos.z, rocketAcc.z;
@@ -407,8 +422,10 @@ void updateApogee(int pred){
   double a = rocketAcc.z-G;
   
 
-  if(pred==1){   
-    predApogee = v*v*log(fabs(a/G))/(2*fabs(a+G)) + p;
+  if(pred==1){
+    if(rocketAcc.z!=0){  
+      predApogee = v*v*log(fabs(a/G))/(2*fabs(a+G)) + p;
+    } 
   }
   
   if(pred==2){
@@ -475,7 +492,6 @@ void updateFinAngles(int cont){
     AOA = 0;
   }
 
-
   finsAngles[0] = AOA;
   finsAngles[1] = -AOA;
   finsAngles[2] = AOA;
@@ -483,12 +499,15 @@ void updateFinAngles(int cont){
  
 }
 
-void writeFinAngles(){
+void sendFinAngles(){
 
+  // Map motor offsets
   int offset1 = (MAX_OFFSET_1-MIN_OFFSET_1)*abs(finsAngles[0])/90+MIN_OFFSET_1;
   int offset2 = (MAX_OFFSET_2-MIN_OFFSET_2)*abs(finsAngles[1])/90+MIN_OFFSET_2;
   int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*abs(finsAngles[2])/90+MIN_OFFSET_3;
   int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*abs(finsAngles[3])/90+MIN_OFFSET_4;
+
+  // Actuate motors
   my_servo1.write(FIN_MIN+finsAngles[0]+offset1);
   my_servo2.write(FIN_MAX+finsAngles[1]+offset2);
   my_servo3.write(FIN_MIN+finsAngles[2]+offset3);
