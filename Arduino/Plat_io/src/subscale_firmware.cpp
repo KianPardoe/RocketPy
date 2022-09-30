@@ -349,10 +349,10 @@ void writeFinAngles(){
   toWrite = toWrite + "," + String(finsAngles[3]);
 
     // Map motor offsets
-  int offset1 = (MAX_OFFSET_1-MIN_OFFSET_1)*abs(finsAngles[0])/90+MIN_OFFSET_1;
-  int offset2 = (MAX_OFFSET_2-MIN_OFFSET_2)*abs(finsAngles[1])/90+MIN_OFFSET_2;
-  int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*abs(finsAngles[2])/90+MIN_OFFSET_3;
-  int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*abs(finsAngles[3])/90+MIN_OFFSET_4;
+  int offset1 = (MAX_OFFSET_1-MIN_OFFSET_1)*fabs(finsAngles[0])/90.0+MIN_OFFSET_1;
+  int offset2 = (MAX_OFFSET_2-MIN_OFFSET_2)*fabs(finsAngles[1])/90.0+MIN_OFFSET_2;
+  int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*fabs(finsAngles[2])/90.0+MIN_OFFSET_3;
+  int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*fabs(finsAngles[3])/90.0+MIN_OFFSET_4;
 
   toWrite = toWrite + "," + String(FIN_MIN+finsAngles[0]+offset1);
   toWrite = toWrite + "," + String(FIN_MAX+finsAngles[1]+offset2);
@@ -442,36 +442,6 @@ void updateApogee(int pred){
   if(pred==2){
     // C: predictor 2 needs Cd values
   }
-    
-
-  Serial.print("PRED=");
-  Serial.print(predApogee);
-  Serial.print("________");
-  Serial.print("p=");
-  Serial.print(p);
-  Serial.print("________");
-  Serial.print("v=");
-  Serial.print(v);
-  Serial.print("________");
-  Serial.print("a=");
-  Serial.print(a);
-  Serial.print("________");
-  Serial.print("G=");
-  Serial.print(G);
-  Serial.print("________");
-
-  Serial.print("log(fabs(a/G))=");
-  Serial.print(log(fabs(a/G)));
-  Serial.print("________");
-  Serial.print("fabs(a+G)=");
-  Serial.print(fabs(a+G));
-  Serial.print("________");
-  Serial.print("v^2=");
-  Serial.print(v*v);
-  Serial.print("________");
-
-
-  Serial.print("\n");
 
 }
 
@@ -492,7 +462,7 @@ void updateFinAngles(int cont){
   }
   
   if(cont==1){
-    AOA = PRO/DEG2RAD*apogeeError + INT/DEG2RAD*cumaApogeeError + DER/DEG2RAD*changeApogeeError;
+    AOA = PRO*apogeeError + INT/DEG2RAD*cumaApogeeError + DER/DEG2RAD*changeApogeeError;
   }
   
   //if(cont==2){
@@ -508,9 +478,9 @@ void updateFinAngles(int cont){
   }
 
   // Do not acutate during ground phase
-  if(rocketPos.z<HEIGHT_ACTIVE){
-    AOA = 0;
-  }
+  //if(rocketPos.z<HEIGHT_ACTIVE){
+    //AOA = 0;
+  //}
 
   finsAngles[0] = AOA;
   finsAngles[1] = -AOA;
@@ -522,10 +492,10 @@ void updateFinAngles(int cont){
 void sendFinAngles(){
 
   // Map motor offsets
-  int offset1 = (MAX_OFFSET_1-MIN_OFFSET_1)*abs(finsAngles[0])/90+MIN_OFFSET_1;
-  int offset2 = (MAX_OFFSET_2-MIN_OFFSET_2)*abs(finsAngles[1])/90+MIN_OFFSET_2;
-  int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*abs(finsAngles[2])/90+MIN_OFFSET_3;
-  int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*abs(finsAngles[3])/90+MIN_OFFSET_4;
+  int offset1 = (MAX_OFFSET_1-MIN_OFFSET_1)*fabs(finsAngles[0])/90.0+MIN_OFFSET_1;
+  int offset2 = (MAX_OFFSET_2-MIN_OFFSET_2)*fabs(finsAngles[1])/90.0+MIN_OFFSET_2;
+  int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*fabs(finsAngles[2])/90.0+MIN_OFFSET_3;
+  int offset4 = (MAX_OFFSET_4-MIN_OFFSET_4)*fabs(finsAngles[3])/90.0+MIN_OFFSET_4;
 
   // Actuate motors
   my_servo1.write(FIN_MIN+finsAngles[0]+offset1);
