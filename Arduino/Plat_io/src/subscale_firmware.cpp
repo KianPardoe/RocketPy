@@ -144,7 +144,7 @@ float groundLevelPressurehPa = 1013.25;  // (hPa) Gets changed on setup to curre
 
 
 void setup() {
-  Serial.begin(115200);
+  //Serial.begin(115200);
 
 // Initialise Kalman Filter Variables
 Xk << 0, 0, 0;
@@ -348,7 +348,7 @@ void writeFinAngles(){
   toWrite = toWrite + "," + String(finsAngles[2]);
   toWrite = toWrite + "," + String(finsAngles[3]);
 
-    // Map motor offsets
+  //Map motor offsets
   int offset1 = (MAX_OFFSET_1-MIN_OFFSET_1)*fabs(finsAngles[0])/90.0+MIN_OFFSET_1;
   int offset2 = (MAX_OFFSET_2-MIN_OFFSET_2)*fabs(finsAngles[1])/90.0+MIN_OFFSET_2;
   int offset3 = (MAX_OFFSET_3-MIN_OFFSET_3)*fabs(finsAngles[2])/90.0+MIN_OFFSET_3;
