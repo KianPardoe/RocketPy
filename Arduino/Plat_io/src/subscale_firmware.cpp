@@ -28,18 +28,18 @@
 #define FIN_MAX 130
 #define FIN_MIN 10
 //0 DEG
-#define MIN_OFFSET_1 -8
-#define MIN_OFFSET_2 -3
-#define MIN_OFFSET_3 -7
-#define MIN_OFFSET_4 0
+#define MIN_OFFSET_1 0
+#define MIN_OFFSET_2 0
+#define MIN_OFFSET_3 0
+#define MIN_OFFSET_4 -6
 //90 DEG
-#define MAX_OFFSET_1 0
-#define MAX_OFFSET_2 -18
-#define MAX_OFFSET_3 0
-#define MAX_OFFSET_4 -5
+#define MAX_OFFSET_1 17
+#define MAX_OFFSET_2 -30
+#define MAX_OFFSET_3 10
+#define MAX_OFFSET_4 12
 
 // FIN CONTROL
-#define HEIGHT_ACTIVE 0
+#define HEIGHT_ACTIVE 3
 #define FIXED_FIN_ANGLE 0
 
 // Kalman Filter Variables
@@ -264,7 +264,7 @@ void loop() {
   getKalmanFilterPred();
   updateApogee(1);
   updateApogeeErrors();
-  updateFinAngles(1);
+  updateFinAngles(0);
   sendFinAngles();
 
   writeTime();
