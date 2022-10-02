@@ -26,17 +26,17 @@
 
 // FIN OFFSETS
 #define FIN_MAX 130
-#define FIN_MIN 10
+#define FIN_MIN 15
 //0 DEG
-#define MIN_OFFSET_1 0
-#define MIN_OFFSET_2 0
+#define MIN_OFFSET_1 -5
+#define MIN_OFFSET_2 8
 #define MIN_OFFSET_3 0
-#define MIN_OFFSET_4 -6
+#define MIN_OFFSET_4 -10
 //90 DEG
-#define MAX_OFFSET_1 17
-#define MAX_OFFSET_2 -30
-#define MAX_OFFSET_3 10
-#define MAX_OFFSET_4 12
+#define MAX_OFFSET_1 5
+#define MAX_OFFSET_2 0
+#define MAX_OFFSET_3 -11
+#define MAX_OFFSET_4 -10
 
 // FIN CONTROL
 #define HEIGHT_ACTIVE 3

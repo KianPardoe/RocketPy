@@ -15,20 +15,20 @@
 
 
 // #define FIN_MAX 130
-// #define FIN_MIN 10
+// #define FIN_MIN 15
 
 // // 0 DEG
-// #define OFFSET_1 0
-// #define OFFSET_2 0
+// #define OFFSET_1 -5
+// #define OFFSET_2 8
 // #define OFFSET_3 0
-// #define OFFSET_4 0
+// #define OFFSET_4 -10
 
 
 // // //90 DEG
-// // #define OFFSET_1 0
-// // #define OFFSET_2 -18
-// // #define OFFSET_3 -2
-// // #define OFFSET_4 -5
+// // #define OFFSET_1 5
+// // #define OFFSET_2 0
+// // #define OFFSET_3 -11
+// // #define OFFSET_4 -10
 
 
 // // ROCKET DYNAMICS
@@ -40,12 +40,12 @@
 // double rocketAngVel[] = {0,0,0};
 // double rocketAngAcc[] = {0,0,0};
 
-// int maxx=130;
-// int minn=10;
-// int SWEEP_SIZE=1;
+// int minn =0; 
+// int maxx=0;
+// int SWEEP_SIZE=3;
 
 // // CONTROLLER DYNAMICS
-// int finsAngles[] = {minn,minn,minn,minn};
+// int finsAngles[] = {0,0,0,0};
 
 // void setup() {
 
@@ -71,20 +71,21 @@
 // }
 
 // void loop() {
-
-// //   for(int pos = minn; pos <= maxx; pos = pos +SWEEP_SIZE){
-// //      my_servo1.write(pos);
-// //      my_servo2.write(maxx+minn-pos);
-// //      my_servo3.write(pos);
-// //      my_servo4.write(maxx+minn-pos);
+// // minn=0;
+// // maxx=110;
+// //   for(int AOA = minn; AOA <= maxx; AOA = AOA +SWEEP_SIZE){
+// //       my_servo1.write(FIN_MIN+AOA+OFFSET_1);
+// //   my_servo2.write(FIN_MAX-AOA+OFFSET_2);
+// //   my_servo3.write(FIN_MIN+AOA+OFFSET_3);
+// //   my_servo4.write(FIN_MAX-AOA+OFFSET_4);
 // //     delay(10);    
 // //   }
 // // delay(200);
-// //   for(int pos = maxx; pos >= minn; pos = pos -SWEEP_SIZE){
-// //      my_servo1.write(pos);
-// //      my_servo2.write(maxx+minn-pos);
-// //      my_servo3.write(pos);
-// //      my_servo4.write(maxx+minn-pos);
+// //   for(int AOA = maxx; AOA >= minn; AOA = AOA -SWEEP_SIZE){
+// //     my_servo1.write(FIN_MIN+AOA+OFFSET_1);
+// //   my_servo2.write(FIN_MAX-AOA+OFFSET_2);
+// //   my_servo3.write(FIN_MIN+AOA+OFFSET_3);
+// //   my_servo4.write(FIN_MAX-AOA+OFFSET_4);
 // //     delay(10); 
 // //   }
  
