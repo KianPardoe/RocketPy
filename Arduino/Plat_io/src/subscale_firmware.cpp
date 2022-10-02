@@ -17,7 +17,7 @@
 
 #define G 9.81
 
-#define PRO 1000.0
+#define PRO 5.3
 #define INT 0.0
 #define DER 0.0
 
@@ -113,7 +113,7 @@ float finsAngles[] = {0,0,0,0};
 float rocketKF[] = {0,0,0};
 
 // SUPERVISOR
-float setApogee = 0.5;
+float setApogee = 75;
 float predApogee = setApogee;
 float lastPredApogee = setApogee;
 
@@ -264,7 +264,7 @@ void loop() {
   getKalmanFilterPred();
   updateApogee(1);
   updateApogeeErrors();
-  updateFinAngles(0);
+  updateFinAngles(1);
   sendFinAngles();
 
   writeTime();
