@@ -24,9 +24,9 @@
 #define INT 1.9
 #define DER 0.0
 
-#define VEL_PRO 5.3/90.0
-#define VEL_INT 0.0/90.0
-#define VEL_DER 0.0/90.0
+#define VEL_PRO 5.3/2600.0
+#define VEL_INT 0.0/2600.0
+#define VEL_DER 0.0/2600.0
 
 #define SWEEP_SIZE 1
 #define DEG2RAD PI/180.0
