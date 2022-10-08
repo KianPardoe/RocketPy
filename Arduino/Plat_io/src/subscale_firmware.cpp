@@ -19,9 +19,9 @@
 // DYNAMIC CONSTANTS
 #define G 9.81
 
-// CONTROLELR CONSTANTS
+// CONTROLLER CONSTANTS
 #define PRO 5.3
-#define INT 0.0
+#define INT 1.9
 #define DER 0.0
 
 #define VEL_PRO 5.3/90.0
