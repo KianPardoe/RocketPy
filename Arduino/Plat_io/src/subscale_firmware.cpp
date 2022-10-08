@@ -467,7 +467,7 @@ void updateFinAngles(int cont){
   double AOA;
 
   if(der_enable == 0){
-    if(AOA!=0){
+    if(finsAngles[0]!=0){
       der_enable = 1.0;
     }
   }
