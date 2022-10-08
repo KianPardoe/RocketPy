@@ -8,6 +8,7 @@
 #include "Adafruit_BMP3XX.h"
 #include <ArduinoEigen.h>
 
+// PIN CONSTANTS
 #define SERVO1 6
 #define SERVO2 8
 #define SERVO3 10
@@ -15,11 +16,17 @@
 
 #define BUZZ_PIN 32
 
+// DYNAMIC CONSTANTS
 #define G 9.81
 
+// CONTROLELR CONSTANTS
 #define PRO 5.3
 #define INT 0.0
 #define DER 0.0
+
+#define VEL_PRO 5.3/90.0
+#define VEL_INT 0.0/90.0
+#define VEL_DER 0.0/90.0
 
 #define SWEEP_SIZE 1
 #define DEG2RAD PI/180.0
@@ -108,6 +115,8 @@ xyzType rocketAngVel = {0,0,0};
 
 // CONTROLLER DYNAMICS
 float finsAngles[] = {0,0,0,0};
+float AOAHold = 0;
+float der_enable = 0;
 
 // KALMAN FILTERED STATE VECTOR (Height, Velocity, Acceleration)
 float rocketKF[] = {0,0,0};
@@ -457,17 +466,25 @@ void updateFinAngles(int cont){
 
   double AOA;
 
+  if(der_enable == 0){
+    if(AOA!=0){
+      der_enable = 1.0;
+    }
+  }
+
+
   if(cont==0){
     AOA = FIXED_FIN_ANGLE;
   }
   
   if(cont==1){
-    AOA = PRO*apogeeError + INT/DEG2RAD*cumaApogeeError + DER/DEG2RAD*changeApogeeError;
+    AOA = PRO*apogeeError + INT/DEG2RAD*cumaApogeeError + DER*der_enable/DEG2RAD*changeApogeeError;
   }
   
-  //if(cont==2){
-    // C: lqr 2
-  //}
+  if(cont==2){
+    float deltaAngle = PRO*apogeeError + INT/DEG2RAD*cumaApogeeError + DER/DEG2RAD*changeApogeeError;
+    AOA = AOAHold+ deltaAngle;
+  }
 
   // Limits
   if(AOA>90){
@@ -476,6 +493,8 @@ void updateFinAngles(int cont){
   else if(AOA<0){
     AOA = 0;
   }
+
+  AOAHold = AOA;
 
   // Do not acutate during ground phase
   //if(rocketPos.z<HEIGHT_ACTIVE){
