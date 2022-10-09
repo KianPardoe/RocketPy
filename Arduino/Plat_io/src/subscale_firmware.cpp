@@ -24,9 +24,9 @@
 #define INT -1.9
 #define DER 0.0
 
-#define VEL_PRO 2.0/2600.0
-#define VEL_INT 0.0/2600.0
-#define VEL_DER 0.0/2600.0
+#define VEL_PRO 2.2
+#define VEL_INT 0.0/130.0
+#define VEL_DER 0.0/130.0
 
 #define SWEEP_SIZE 1
 #define DEG2RAD PI/180.0
@@ -46,7 +46,7 @@
 #define MAX_OFFSET_4 -10
 
 // FIN CONTROL
-#define HEIGHT_ACTIVE 3
+#define HEIGHT_ACTIVE 2
 #define FIXED_FIN_ANGLE 0
 
 // Kalman Filter Variables
@@ -122,7 +122,7 @@ float der_enable = 0;
 float rocketKF[] = {0,0,0};
 
 // SUPERVISOR
-float setApogee = 70;
+float setApogee = 70.0;
 float predApogee = setApogee;
 float lastPredApogee = setApogee;
 
@@ -482,7 +482,7 @@ void updateFinAngles(int cont){
   }
   
   if(cont==2){
-    float deltaAngle = PRO*apogeeError + INT/DEG2RAD*cumaApogeeError + DER/DEG2RAD*changeApogeeError;
+    float deltaAngle = VEL_PRO*apogeeError + VEL_INT/DEG2RAD*cumaApogeeError + VEL_DER/DEG2RAD*changeApogeeError;
     AOA = AOAHold+ deltaAngle;
   }
 
@@ -497,9 +497,9 @@ void updateFinAngles(int cont){
   AOAHold = AOA;
 
   // Do not acutate during ground phase
-  //if(rocketPos.z<HEIGHT_ACTIVE){
-    //AOA = 0;
-  //}
+  if(rocketPos.z<HEIGHT_ACTIVE){
+    AOA = 0;
+  }
 
   finsAngles[0] = AOA;
   finsAngles[1] = -AOA;
