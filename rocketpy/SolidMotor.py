@@ -741,8 +741,8 @@ class SolidMotor:
         print("Total Burning Time: " + str(self.burnOutTime) + " s")
         print(
             "Total Propellant Mass: "
-            + "{:.3f}".format(self.propellantInitialMass)
-            + " kg"
+            + "{:.3f}".format(1000*self.propellantInitialMass)
+            + " g"
         )
         print(
             "Propellant Exhaust Velocity: "

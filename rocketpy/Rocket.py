@@ -475,6 +475,7 @@ class Rocket:
         # Refresh static margin calculation
         self.evaluateStaticMargin()
 
+        self.nose_tipToCM = length+distanceToCM
         # Return self
         return self.aerodynamicSurfaces[-1]
 
@@ -722,6 +723,8 @@ class Rocket:
         # Refresh static margin calculation
         self.evaluateStaticMargin()
 
+        self.fin_tipToCM = abs(distanceToCM)+rootChord
+
         # Return self
         return self.aerodynamicSurfaces[-1]
 
@@ -918,17 +921,24 @@ class Rocket:
         ------
         None
         """
+        
         # Print inertia details
         print("Inertia Details")
-        print("Rocket Dry Mass: " + str(self.mass) + " kg (No Propellant)")
-        print("Rocket Total Mass: " + str(self.totalMass(0)) + " kg (With Propellant)")
+        print("Rocket Mass: {:.3f} g (No Propellant)".format(self.mass*1000))
+        print("Rocket Mass: {:.3f} g (With Propellant)".format(self.totalMass(0)*1000))
 
         # Print rocket geometrical parameters
         print("\nGeometrical Parameters")
-        print("Rocket Radius: " + str(self.radius) + " m")
+        print("Rocket Diameter: " + str(2*self.radius*1000) + " mm")
+        print("Rocket Length: " + str((self.fin_tipToCM+self.nose_tipToCM)*1000) + " mm")
         
         # Print rocket aerodynamics quantities
         print("\nAerodynamics Stability")
+        print("Cp:" + "{:.3f}".format(self.cpPosition*1000) + " mm")
+        print("Cg (loaded): "
+            + "{:.3f}".format(1000*self.centerOfMass(0))
+            + " mm")        
+        
         print("Initial Static Margin: " + "{:.3f}".format(self.staticMargin(0)) + " c")
         print(
             "Final Static Margin: "
@@ -961,8 +971,8 @@ class Rocket:
         """
         # Print inertia details
         print("Inertia Details")
-        print("Rocket Mass: {:.3f} kg (No Propellant)".format(self.mass))
-        print("Rocket Mass: {:.3f} kg (With Propellant)".format(self.totalMass(0)))
+        print("Rocket Mass: {:.3f} g (No Propellant)".format(self.mass*1000))
+        print("Rocket Mass: {:.3f} g (With Propellant)".format(self.totalMass(0)*1000))
         print("Rocket Inertia I: {:.3f} kg*m2".format(self.inertiaI))
         print("Rocket Inertia Z: {:.3f} kg*m2".format(self.inertiaZ))
 

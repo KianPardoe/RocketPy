@@ -21,10 +21,10 @@
 
 // CONTROLLER CONSTANTS
 #define PRO 5.3
-#define INT 1.9
+#define INT -1.9
 #define DER 0.0
 
-#define VEL_PRO 5.3/2600.0
+#define VEL_PRO 2.0/2600.0
 #define VEL_INT 0.0/2600.0
 #define VEL_DER 0.0/2600.0
 
@@ -122,7 +122,7 @@ float der_enable = 0;
 float rocketKF[] = {0,0,0};
 
 // SUPERVISOR
-float setApogee = 75;
+float setApogee = 70;
 float predApogee = setApogee;
 float lastPredApogee = setApogee;
 
@@ -273,7 +273,7 @@ void loop() {
   getKalmanFilterPred();
   updateApogee(1);
   updateApogeeErrors();
-  updateFinAngles(1);
+  updateFinAngles(2);
   sendFinAngles();
 
   writeTime();
