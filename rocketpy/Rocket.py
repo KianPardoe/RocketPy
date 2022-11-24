@@ -590,6 +590,7 @@ class Rocket:
         self.tipChord = Ct
         self.span = s
         self.distanceRocketFins = distanceToCM
+        self.fin_tipToCM = abs(distanceToCM)+Cr
 
         # Auxiliary functions
 
@@ -723,7 +724,7 @@ class Rocket:
         # Refresh static margin calculation
         self.evaluateStaticMargin()
 
-        self.fin_tipToCM = abs(distanceToCM)+rootChord
+        
 
         # Return self
         return self.aerodynamicSurfaces[-1]
@@ -930,7 +931,9 @@ class Rocket:
         # Print rocket geometrical parameters
         print("\nGeometrical Parameters")
         print("Rocket Diameter: " + str(2*self.radius*1000) + " mm")
-        print("Rocket Length: " + str((self.fin_tipToCM+self.nose_tipToCM)*1000) + " mm")
+        print("Rocket fin to cm: " + str((abs(self.fin_tipToCM))*1000) + " mm")
+        print("Rocket cm to nose: " + str((abs(self.nose_tipToCM))*1000) + " mm")
+        print("Rocket Length: " + str((abs(self.fin_tipToCM)+abs(self.nose_tipToCM))*1000) + " mm")
         
         # Print rocket aerodynamics quantities
         print("\nAerodynamics Stability")
